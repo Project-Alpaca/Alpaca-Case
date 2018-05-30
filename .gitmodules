@@ -1,0 +1,3 @@
+[submodule "ext/lasercut"]
+	path = ext/lasercut
+	url = https://github.com/bmsleight/lasercut.git
