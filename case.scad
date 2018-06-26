@@ -1,16 +1,29 @@
 include <ext/lasercut/lasercut.scad>
 include <footprints.scad>
 include <imperial.scad>
+use <models.scad>
 
-PREVIEW = false;
+PREVIEW = true;
 ENGRAVE = false;
-SHEET = "box1";
+SHEET = "box3";
 SHEET_PANEL = [in(24), in(18)];
-SHEET_BOX = [in(48), in(24)];
+SHEET_BOX = [in(24), in(16)];
+
+PREVIEW_VISIBILITY = [
+    true, // front
+    true, // back
+    true, // left
+    true, // right
+    true, // top cover
+    true, // top panel
+    true, // bottom
+    true, // mounting brackets
+    true, // pivot
+];
 
 BOX_THICKNESS = in(1/4);
 PANEL_THICKNESS = mil(80);
-OUTER_SIZE = [in(24), 225, 120];
+OUTER_SIZE = [in(23), 225, 120];
 FINGER_COUNT = [10, 5, 4];
 
 MAIN_BUTTON_DIST = 125;
@@ -20,6 +33,22 @@ MAIN_BUTTON_OFFSET_Y = 75;
 X = 0;
 Y = 1;
 Z = 2;
+
+FRONT_WALL = 0;
+BACK_WALL = 1;
+LEFT_WALL = 2;
+RIGHT_WALL = 3;
+TOP_COVER = 4;
+TOP_PANEL = 5;
+BOTTOM = 6;
+MOUNTING = 7;
+PIVOT = 8;
+
+module corner_screw_holes(x, y) {
+    //translate([0, 0, 0]) circle(d=3.2, center=true);
+    translate([x, 0, 0]) circle(d=3.2, center=true);
+    translate([0, y, 0]) circle(d=3.2, center=true);
+}
 
 module box_bottom() {
     pivot_tab_x = OUTER_SIZE[X]/2-BOX_THICKNESS/2;
@@ -49,7 +78,6 @@ module box_bottom() {
 }
 
 module box_top() {
-    // TODO inner button footprint, SoftPot cutout
     cut_x = (635-OUTER_SIZE[0])/2;
     pivot_tab_x = OUTER_SIZE[X]/2-BOX_THICKNESS/2;
     pivot_tab_y = OUTER_SIZE[Y];
@@ -91,7 +119,13 @@ module box_top() {
 
 module eng_box_top() {
     cut_x = (635-OUTER_SIZE[0])/2;
-    translate([-cut_x, 0, 0]) translate([MAIN_BUTTON_OFFSET_X, MAIN_BUTTON_OFFSET_Y, 0])
+    translate([15, 15, 0]) corner_screw_holes(15, 15);
+    translate([OUTER_SIZE[X]-15, OUTER_SIZE[Y]-15, 0]) corner_screw_holes(-15, -15);
+    translate([OUTER_SIZE[X]-15, 15, 0]) corner_screw_holes(-15, 15);
+    translate([15, OUTER_SIZE[Y]-15, 0]) corner_screw_holes(15, -15);
+
+    translate([-cut_x, 0, 0])
+        translate([MAIN_BUTTON_OFFSET_X, MAIN_BUTTON_OFFSET_Y, 0])
         translate([1.5*MAIN_BUTTON_DIST, 115, 0]) {
             // Slider position reference
             %square([510, 64], true);
@@ -103,20 +137,29 @@ module eng_box_top() {
         }
 }
 
-module box_side_lr(polarity_ud=1, polarity_lr=0) {
+module box_side_lr() {
     lasercutoutSquare(thickness=BOX_THICKNESS,
                       x=OUTER_SIZE[Z],
                       y=OUTER_SIZE[Y],
                       bumpy_finger_joints=[
-                          [UP, polarity_ud, FINGER_COUNT[Z]],
-                          [DOWN, polarity_ud, FINGER_COUNT[Z]],
-                          [LEFT, polarity_lr, FINGER_COUNT[Y]],
+                          [UP, 1, FINGER_COUNT[Z]],
                           //[RIGHT, polarity_lr, FINGER_COUNT[Y]]
+                      ],
+                      finger_joints=[
+                          [DOWN, 1, FINGER_COUNT[Z]],
+                          [LEFT, 0, FINGER_COUNT[Y]],
                       ]);
 }
 
+module eng_box_side_lr() {
+    //translate([15, 15, 0]) corner_screw_holes(15, 15);
+    translate([OUTER_SIZE[Z]-PANEL_THICKNESS-BOX_THICKNESS-15, OUTER_SIZE[Y]-15, 0]) corner_screw_holes(-15, -15);
+    translate([OUTER_SIZE[Z]-PANEL_THICKNESS-BOX_THICKNESS-15, 15, 0]) corner_screw_holes(-15, 15);
+    //translate([15, OUTER_SIZE[Y]-15, 0]) corner_screw_holes(15, -15);
+}
+
 module box_side_f() {
-    // TODO LCD display, auxiliary control panel
+    // TODO auxiliary control panel
     pivot_tab_x = OUTER_SIZE[X]/2-BOX_THICKNESS/2;
     pivot_tab_y = OUTER_SIZE[Z]-PANEL_THICKNESS-BOX_THICKNESS;
     difference() {
@@ -124,9 +167,10 @@ module box_side_f() {
                           x=OUTER_SIZE[X],
                           y=OUTER_SIZE[Z],
                           bumpy_finger_joints=[
-                              //[UP, 0, FINGER_COUNT[X]],
-                              [DOWN, 0, FINGER_COUNT[X]],
                               [LEFT, 1, FINGER_COUNT[Z]],
+                          ],
+                          finger_joints=[
+                              [DOWN, 0, FINGER_COUNT[X]],
                               [RIGHT, 1, FINGER_COUNT[Z]]
                           ],
                           simple_tab_holes=[
@@ -134,38 +178,55 @@ module box_side_f() {
                               [MID, pivot_tab_x, pivot_tab_y*2/4-BOX_THICKNESS/2],
                               [MID, pivot_tab_x, pivot_tab_y*3/4-BOX_THICKNESS/2],
                           ]);
-        translate([3/4*OUTER_SIZE[X], OUTER_SIZE[Z]/2, 0])
+        translate([5/8*OUTER_SIZE[X], OUTER_SIZE[Z]/2, 0])
             linear_extrude(BOX_THICKNESS) {
                 footprint_1602();
+                translate([70+3, -1.5]) footprint_re();
             }
     }
 }
 
 module eng_box_side_f() {
-    translate([3/4*OUTER_SIZE[X], OUTER_SIZE[Z]/2, 0])
-        linear_extrude(BOX_THICKNESS) {
-            footprint_1602_eng();
-        }
+    translate([5/8*OUTER_SIZE[X], OUTER_SIZE[Z]/2, 0]) {
+        footprint_1602_eng();
+        translate([70+3, -1.5]) footprint_re_eng();
+    }
+    translate([OUTER_SIZE[X]-15, OUTER_SIZE[Z]-PANEL_THICKNESS-BOX_THICKNESS-15, 0]) corner_screw_holes(-15, -15);
+    translate([15, OUTER_SIZE[Z]-PANEL_THICKNESS-BOX_THICKNESS-15, 0]) corner_screw_holes(15, -15);
 }
 
 module box_side_b() {
-    // TODO USB, power port
     pivot_tab_x = OUTER_SIZE[X]/2-BOX_THICKNESS/2;
     pivot_tab_y = OUTER_SIZE[Z]-PANEL_THICKNESS-BOX_THICKNESS;
-    lasercutoutSquare(thickness=BOX_THICKNESS,
-                      x=OUTER_SIZE[X],
-                      y=OUTER_SIZE[Z],
-                      bumpy_finger_joints=[
-                          //[UP, 1, FINGER_COUNT[X]],
-                          [DOWN, 1, FINGER_COUNT[X]],
-                          [LEFT, 0, FINGER_COUNT[Z]],
-                          [RIGHT, 0, FINGER_COUNT[Z]]
-                      ],
-                      simple_tab_holes=[
-                          [MID, pivot_tab_x, pivot_tab_y/4-BOX_THICKNESS/2],
-                          [MID, pivot_tab_x, pivot_tab_y*2/4-BOX_THICKNESS/2],
-                          [MID, pivot_tab_x, pivot_tab_y*3/4-BOX_THICKNESS/2],
-                      ]);
+    difference() {
+        lasercutoutSquare(thickness=BOX_THICKNESS,
+                          x=OUTER_SIZE[X],
+                          y=OUTER_SIZE[Z],
+                          bumpy_finger_joints=[
+                              [RIGHT, 0, FINGER_COUNT[Z]]
+                          ],
+                          finger_joints=[
+                              [DOWN, 1, FINGER_COUNT[X]],
+                              [LEFT, 0, FINGER_COUNT[Z]],
+                              
+                          ],
+                          simple_tab_holes=[
+                              [MID, pivot_tab_x, pivot_tab_y/4-BOX_THICKNESS/2],
+                              [MID, pivot_tab_x, pivot_tab_y*2/4-BOX_THICKNESS/2],
+                              [MID, pivot_tab_x, pivot_tab_y*3/4-BOX_THICKNESS/2],
+                          ]);
+        translate([OUTER_SIZE[X]/4*3, OUTER_SIZE[Z]/3]) {
+            linear_extrude(BOX_THICKNESS) footprint_back_panel_cutout();
+        }
+    }
+}
+
+module eng_box_side_b() {
+    translate([OUTER_SIZE[X]-15, OUTER_SIZE[Z]-PANEL_THICKNESS-BOX_THICKNESS-15, 0]) corner_screw_holes(-15, -15);
+    translate([15, OUTER_SIZE[Z]-PANEL_THICKNESS-BOX_THICKNESS-15, 0]) corner_screw_holes(15, -15);
+    translate([OUTER_SIZE[X]/4*3, OUTER_SIZE[Z]/3]) {
+        footprint_back_panel_cutout_eng();
+    }
 }
 
 module box_pivot() {
@@ -191,6 +252,9 @@ module box_pivot() {
                           [RIGHT, x, y*3/6],
                           [RIGHT, x, y*4/6],
                           [RIGHT, x, y*5/6]
+                      ],
+                      circles_remove=[
+                          [20, x/2, y/2]
                       ]);
 }
 
@@ -260,7 +324,8 @@ module panel_base() {
 }
 
 module panel() {
-    cut_x = (635-OUTER_SIZE[0])/2;
+    cut_x = (635-OUTER_SIZE[X])/2;
+    cut_y = (225-OUTER_SIZE[Y]);
     translate([-cut_x, 0, 0]) difference() {
         translate([MAIN_BUTTON_OFFSET_X, MAIN_BUTTON_OFFSET_Y, 0]) difference() {
             panel_base();
@@ -269,20 +334,30 @@ module panel() {
         }
         square([(635-OUTER_SIZE[0])/2, 225]);
         translate([635-cut_x, 0, 0]) square([(635-OUTER_SIZE[0])/2, 225]);
+        if (cut_y > 0) {
+            translate([0, 225-cut_y, 0]) square([635, cut_y]);
+        }
     }
 }
 
 module eng_panel() {
     cut_x = (635-OUTER_SIZE[0])/2;
-    translate([-cut_x, 0, 0]) translate([MAIN_BUTTON_OFFSET_X, MAIN_BUTTON_OFFSET_Y, 0]) translate([1.5*MAIN_BUTTON_DIST, 115, 0]) {
-        // Slider position reference
-        %square([510, 64], true);
-        // SoftPot reference
-        translate([0, 10-32-6, 0]) {
-            %square([500, 20], true);
-            footprint_softpot_mount(invert=true, tail_cut=false);
+
+    translate([-cut_x, 0, 0]) {
+        translate([MAIN_BUTTON_OFFSET_X, MAIN_BUTTON_OFFSET_Y, 0]) translate([1.5*MAIN_BUTTON_DIST, 115, 0]) {
+            // Slider position reference
+            %square([510, 64], true);
+            // SoftPot reference
+            translate([0, 10-32-6, 0]) {
+                %square([500, 20], true);
+                footprint_softpot_mount(invert=true, tail_cut=false);
+            }
         }
     }
+    translate([15, 15, 0]) corner_screw_holes(15, 15);
+    translate([OUTER_SIZE[X]-15, OUTER_SIZE[Y]-15, 0]) corner_screw_holes(-15, -15);
+    translate([OUTER_SIZE[X]-15, 15, 0]) corner_screw_holes(-15, 15);
+    translate([15, OUTER_SIZE[Y]-15, 0]) corner_screw_holes(15, -15);
 }
 
 module panel1_2d() {
@@ -298,65 +373,151 @@ module box1_2d() {
     %square(SHEET_BOX);
     if (ENGRAVE) {
         eng_box_top();
+        translate([BOX_THICKNESS, BOX_THICKNESS*2+OUTER_SIZE[Y]])
+            eng_box_side_f();
     } else {
         projection() {
             box_top();
-            translate([BOX_THICKNESS, BOX_THICKNESS*2+OUTER_SIZE[Y], 0]) box_bottom();
+            translate([BOX_THICKNESS, BOX_THICKNESS*2+OUTER_SIZE[Y]])
+                box_side_f();
+            //translate([BOX_THICKNESS, BOX_THICKNESS*2+OUTER_SIZE[Y], 0]) box_bottom();
+        }
+    }
+}
+
+module box2_2d() {
+    %square(SHEET_BOX);
+    if (ENGRAVE) {
+        // TODO
+        translate([BOX_THICKNESS, BOX_THICKNESS*3+OUTER_SIZE[Y]])
+            eng_box_side_b();
+    } else {
+        projection() {
+            translate([BOX_THICKNESS, BOX_THICKNESS]) box_bottom();
+            translate([BOX_THICKNESS, BOX_THICKNESS*3+OUTER_SIZE[Y]])
+                box_side_b();
+        }
+    }
+}
+
+module box3_2d() {
+    %square(SHEET_BOX);
+    if (ENGRAVE) {
+        translate([BOX_THICKNESS*2+OUTER_SIZE[Y], 0])
+        rotate([0, 0, 90]) {
+            translate([BOX_THICKNESS, BOX_THICKNESS]) eng_box_side_lr();
+            translate([BOX_THICKNESS*3+OUTER_SIZE[Z], BOX_THICKNESS])
+                eng_box_side_lr();
+        }
+    } else {
+        projection()
+        translate([BOX_THICKNESS*2+OUTER_SIZE[Y], 0])
+        rotate([0, 0, 90]) {
+            translate([BOX_THICKNESS, BOX_THICKNESS]) box_side_lr();
+            translate([BOX_THICKNESS*3+OUTER_SIZE[Z], BOX_THICKNESS]) {
+                box_side_lr();
+                translate([BOX_THICKNESS*2+OUTER_SIZE[Z], 0])
+                    box_pivot();
+            }
         }
     }
 }
 
 if (PREVIEW) {
-    color("Green",0.5) box_bottom();
+    if (PREVIEW_VISIBILITY[BOTTOM]) {
+        color("Green",0.5) box_bottom();
+    }
 
-    color("Cyan",0.5)
-        translate([0,0,BOX_THICKNESS])
-        rotate([0, -90, 0])
-            box_side_lr();
+    if (PREVIEW_VISIBILITY[LEFT_WALL]) {
+        color("Magenta",0.5)
+            translate([0,0,BOX_THICKNESS])
+            rotate([0, -90, 0])
+            difference() {
+                box_side_lr();
+                linear_extrude(BOX_THICKNESS) eng_box_side_lr();
+            }
+    }
 
-    color("Cyan",0.5)
-        translate([OUTER_SIZE[X]+BOX_THICKNESS,0,BOX_THICKNESS])
-        rotate([0, -90, 0])
-            box_side_lr(polarity_ud=0, polarity_lr=1);
+    if (PREVIEW_VISIBILITY[RIGHT_WALL]) {
+        color("Cyan",0.5)
+            translate([OUTER_SIZE[X],OUTER_SIZE[Y],BOX_THICKNESS])
+            rotate([0, -90, 180])
+            difference() {
+                box_side_lr();
+                linear_extrude(BOX_THICKNESS) eng_box_side_lr();
+            }
+    }
 
-    color("Orange", 0.5)
-        translate([0,0,BOX_THICKNESS])
-        rotate([90, 0, 0])
-        difference() {
-            box_side_f();
-            eng_box_side_f();
-        }
+    if (PREVIEW_VISIBILITY[FRONT_WALL]) {
+        color("Orange", 0.5)
+            translate([0,0,BOX_THICKNESS])
+            rotate([90, 0, 0])
+            difference() {
+                box_side_f();
+                linear_extrude(BOX_THICKNESS) eng_box_side_f();
+            }
+    }
 
-    color("Purple", 0.5)
-        translate([0,OUTER_SIZE[Y]+BOX_THICKNESS,BOX_THICKNESS])
-        rotate([90, 0, 0])
-            box_side_b();
+    if (PREVIEW_VISIBILITY[BACK_WALL]) {
+        color("Purple", 0.5)
+            translate([0,OUTER_SIZE[Y]+BOX_THICKNESS,BOX_THICKNESS])
+            rotate([90, 0, 0])
+            difference() {
+                box_side_b();
+                linear_extrude(BOX_THICKNESS) eng_box_side_b();
+            }
+    }
 
-    color("Red", 0.5)
-        translate([OUTER_SIZE[X]/2+BOX_THICKNESS/2,0,BOX_THICKNESS])
-        rotate([0, -90, 0])
-            box_pivot();
+    if (PREVIEW_VISIBILITY[PIVOT]) {
+        color("Red", 0.5)
+            translate([OUTER_SIZE[X]/2+BOX_THICKNESS/2,0,BOX_THICKNESS])
+            rotate([0, -90, 0])
+                box_pivot();
+    }
 
-    color("Yellow", 0.5)
+    if (PREVIEW_VISIBILITY[TOP_COVER]) {
+        color("Yellow", 0.5)
+            translate([0, 0, OUTER_SIZE[Z]-PANEL_THICKNESS])
+            difference() {
+                box_top();
+                linear_extrude(BOX_THICKNESS) eng_box_top();
+            }
+    }
+
+    if (PREVIEW_VISIBILITY[TOP_PANEL]) {
+        color("Grey", 0.5)
+            translate([0, 0, OUTER_SIZE[Z]+BOX_THICKNESS-PANEL_THICKNESS])
+            linear_extrude(PANEL_THICKNESS)
+            difference() {
+                panel();
+                eng_panel();
+            }
+    }
+
+    if (PREVIEW_VISIBILITY[MOUNTING]) {
         translate([0, 0, OUTER_SIZE[Z]-PANEL_THICKNESS])
-        difference() {
-            box_top();
-            linear_extrude(BOX_THICKNESS) eng_box_top();
-        }
+            rotate([-90, 0, 0])
+            mounting_bracket();
+        translate([0, OUTER_SIZE[Y], OUTER_SIZE[Z]-PANEL_THICKNESS])
+            rotate([-90, 0, -90])
+            mounting_bracket();
+        translate([OUTER_SIZE[X], 0, OUTER_SIZE[Z]-PANEL_THICKNESS])
+            rotate([-90, 0, -270])
+            mounting_bracket();
+        translate([OUTER_SIZE[X], OUTER_SIZE[Y], OUTER_SIZE[Z]-PANEL_THICKNESS])
+            rotate([-90, 0, -180])
+            mounting_bracket();
+    }
 
-    color("Grey", 0.5)
-        translate([0, 0, OUTER_SIZE[Z]+BOX_THICKNESS-PANEL_THICKNESS])
-        linear_extrude(PANEL_THICKNESS)
-        difference() {
-            panel();
-            eng_panel();
-        }
 } else {
     if (SHEET == "panel1") {
         panel1_2d();
     } else if (SHEET == "box1") {
         box1_2d();
+    } else if (SHEET == "box2") {
+        box2_2d();
+    } else if (SHEET == "box3") {
+        box3_2d();
     }
-
 }
 
