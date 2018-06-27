@@ -56,8 +56,8 @@ module mounting_bracket() {
     intersection() {
         union() {
             _single_wall();
-            mirror()
-                rotate([0, -90, 0]) _single_wall();
+            rotate([0, 0, 90])
+                rotate([90, 0, 0]) _single_wall();
             mirror([0, 1, 0])
                 rotate([90, 0, 0]) _single_wall();
         }

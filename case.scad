@@ -3,12 +3,21 @@ include <footprints.scad>
 include <imperial.scad>
 use <models.scad>
 
+// Build flags
+
+// Set this to true to get a 3D preview of the assembled controller
 PREVIEW = true;
+// Set this to true when PREVIEW=false generates layer for laser engraving
+// (mainly for position of screw holes so they can be drilled later)
 ENGRAVE = false;
-SHEET = "box3";
+// box1, box2, box3 were intended to be cut from wood, panel1 was
+// intended to be cut from acrylic
+SHEET = "box1";
+// Size of panel sheet and box sheets (for reference only)
 SHEET_PANEL = [in(24), in(18)];
 SHEET_BOX = [in(24), in(16)];
 
+// Sets visibility of objects in preview
 PREVIEW_VISIBILITY = [
     true, // front
     true, // back
@@ -21,9 +30,13 @@ PREVIEW_VISIBILITY = [
     true, // pivot
 ];
 
+// Thickness of sheets
 BOX_THICKNESS = in(1/4);
 PANEL_THICKNESS = mil(80);
+
+// Size of the controller
 OUTER_SIZE = [in(23), 225, 120];
+
 FINGER_COUNT = [10, 5, 4];
 
 MAIN_BUTTON_DIST = 125;
@@ -183,6 +196,9 @@ module box_side_f() {
                 footprint_1602();
                 translate([70+3, -1.5]) footprint_re();
             }
+        translate([55/64*OUTER_SIZE[X], OUTER_SIZE[Z]/2, 0])
+            linear_extrude(BOX_THICKNESS)
+            footprint_control();
     }
 }
 
@@ -193,6 +209,8 @@ module eng_box_side_f() {
     }
     translate([OUTER_SIZE[X]-15, OUTER_SIZE[Z]-PANEL_THICKNESS-BOX_THICKNESS-15, 0]) corner_screw_holes(-15, -15);
     translate([15, OUTER_SIZE[Z]-PANEL_THICKNESS-BOX_THICKNESS-15, 0]) corner_screw_holes(15, -15);
+    translate([55/64*OUTER_SIZE[X], OUTER_SIZE[Z]/2, 0])
+        footprint_control_eng();
 }
 
 module box_side_b() {
@@ -424,6 +442,7 @@ module box3_2d() {
 }
 
 if (PREVIEW) {
+    echo("WARNING: This is just a preview. Set PREVIEW=false to get laser cuttable shapes.");
     if (PREVIEW_VISIBILITY[BOTTOM]) {
         color("Green",0.5) box_bottom();
     }
