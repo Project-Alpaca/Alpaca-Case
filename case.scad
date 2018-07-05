@@ -391,6 +391,16 @@ module eng_panel() {
     translate([15, OUTER_SIZE[Y]-15, 0]) corner_screw_holes(15, -15);
 }
 
+module inv_panel() {
+    cut_x = (635-OUTER_SIZE[0])/2;
+    translate([-cut_x, 0, 0])
+        translate([MAIN_BUTTON_OFFSET_X, MAIN_BUTTON_OFFSET_Y, 0])
+        translate([1.5*MAIN_BUTTON_DIST, 115, 0])
+        translate([0, 10-32-6, 0]) {
+            square([520-1, 40-1], center=true);
+        }
+}
+
 module panel1_2d() {
     %square(SHEET_PANEL);
     if (ENGRAVE) {
@@ -524,10 +534,17 @@ if (PREVIEW) {
     if (PREVIEW_VISIBILITY[TOP_PANEL]) {
         color("Grey", 0.5)
             translate([0, 0, OUTER_SIZE[Z]+BOX_THICKNESS-PANEL_THICKNESS])
-            linear_extrude(PANEL_THICKNESS)
-            difference() {
-                panel();
-                eng_panel();
+            linear_extrude(PANEL_THICKNESS) {
+                difference() {
+                    panel();
+                    eng_panel();
+                    inv_panel();
+                }
+                difference() {
+                    inv_panel();
+                    panel();
+                    eng_panel();
+                }
             }
     }
 
