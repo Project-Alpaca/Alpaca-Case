@@ -90,6 +90,13 @@ module box_bottom() {
                       ]);
 }
 
+module eng_box_bottom() {
+    translate([15, 15, 0]) corner_screw_holes(15, 15);
+    translate([OUTER_SIZE[X]-15, OUTER_SIZE[Y]-15, 0]) corner_screw_holes(-15, -15);
+    translate([OUTER_SIZE[X]-15, 15, 0]) corner_screw_holes(-15, 15);
+    translate([15, OUTER_SIZE[Y]-15, 0]) corner_screw_holes(15, -15);
+}
+
 module box_top() {
     cut_x = (635-OUTER_SIZE[0])/2;
     pivot_tab_x = OUTER_SIZE[X]/2-BOX_THICKNESS/2;
@@ -165,10 +172,10 @@ module box_side_lr() {
 }
 
 module eng_box_side_lr() {
-    //translate([15, 15, 0]) corner_screw_holes(15, 15);
+    translate([15, 15, 0]) corner_screw_holes(15, 15);
     translate([OUTER_SIZE[Z]-PANEL_THICKNESS-BOX_THICKNESS-15, OUTER_SIZE[Y]-15, 0]) corner_screw_holes(-15, -15);
     translate([OUTER_SIZE[Z]-PANEL_THICKNESS-BOX_THICKNESS-15, 15, 0]) corner_screw_holes(-15, 15);
-    //translate([15, OUTER_SIZE[Y]-15, 0]) corner_screw_holes(15, -15);
+    translate([15, OUTER_SIZE[Y]-15, 0]) corner_screw_holes(15, -15);
 }
 
 module box_side_f() {
@@ -209,6 +216,8 @@ module eng_box_side_f() {
     }
     translate([OUTER_SIZE[X]-15, OUTER_SIZE[Z]-PANEL_THICKNESS-BOX_THICKNESS-15, 0]) corner_screw_holes(-15, -15);
     translate([15, OUTER_SIZE[Z]-PANEL_THICKNESS-BOX_THICKNESS-15, 0]) corner_screw_holes(15, -15);
+    translate([15, 15, 0]) corner_screw_holes(15, 15);
+    translate([OUTER_SIZE[X]-15, 15, 0]) corner_screw_holes(-15, 15);
     translate([55/64*OUTER_SIZE[X], OUTER_SIZE[Z]/2, 0])
         footprint_control_eng();
 }
@@ -242,6 +251,8 @@ module box_side_b() {
 module eng_box_side_b() {
     translate([OUTER_SIZE[X]-15, OUTER_SIZE[Z]-PANEL_THICKNESS-BOX_THICKNESS-15, 0]) corner_screw_holes(-15, -15);
     translate([15, OUTER_SIZE[Z]-PANEL_THICKNESS-BOX_THICKNESS-15, 0]) corner_screw_holes(15, -15);
+    translate([15, 15, 0]) corner_screw_holes(15, 15);
+    translate([OUTER_SIZE[X]-15, 15, 0]) corner_screw_holes(-15, 15);
     translate([OUTER_SIZE[X]/4*3, OUTER_SIZE[Z]/3]) {
         footprint_back_panel_cutout_eng();
     }
@@ -265,6 +276,8 @@ module box_pivot() {
                           [LEFT, 0, y*3/6],
                           [LEFT, 0, y*4/6],
                           [LEFT, 0, y*5/6],
+                          // TODO this does not work well, bug in lasercut
+                          // library?
                           [RIGHT, x, y/6],
                           [RIGHT, x, y*2/6],
                           [RIGHT, x, y*3/6],
@@ -407,6 +420,8 @@ module box2_2d() {
     %square(SHEET_BOX);
     if (ENGRAVE) {
         // TODO
+        translate([BOX_THICKNESS, BOX_THICKNESS])
+            eng_box_bottom();
         translate([BOX_THICKNESS, BOX_THICKNESS*3+OUTER_SIZE[Y]])
             eng_box_side_b();
     } else {
@@ -444,7 +459,10 @@ module box3_2d() {
 if (PREVIEW) {
     echo("WARNING: This is just a preview. Set PREVIEW=false to get laser cuttable shapes.");
     if (PREVIEW_VISIBILITY[BOTTOM]) {
-        color("Green",0.5) box_bottom();
+        color("Green",0.5) difference() {
+            box_bottom();
+            linear_extrude(BOX_THICKNESS) eng_box_bottom();
+        }
     }
 
     if (PREVIEW_VISIBILITY[LEFT_WALL]) {
