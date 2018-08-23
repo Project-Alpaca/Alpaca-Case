@@ -453,14 +453,13 @@ module box3_2d() {
                 eng_box_side_lr();
         }
     } else {
-        projection()
         translate([BOX_THICKNESS*2+OUTER_SIZE[Y], 0])
         rotate([0, 0, 90]) {
-            translate([BOX_THICKNESS, BOX_THICKNESS]) box_side_lr();
+            translate([BOX_THICKNESS, BOX_THICKNESS]) projection() box_side_lr();
             translate([BOX_THICKNESS*3+OUTER_SIZE[Z], BOX_THICKNESS]) {
-                box_side_lr();
+                projection() box_side_lr();
                 translate([BOX_THICKNESS*2+OUTER_SIZE[Z], 0])
-                    box_pivot();
+                    projection() box_pivot();
             }
         }
     }
