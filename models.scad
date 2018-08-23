@@ -2,6 +2,8 @@ include <footprints.scad>
 
 MOUNTING_WALL_THICKNESS = 8;
 
+ITEM = undef;
+
 module printed_panel() {
     $fn=25;
     linear_extrude(2) difference() {
@@ -65,5 +67,11 @@ module mounting_bracket() {
     }
 }
 
-// printed_panel();
-mounting_bracket();
+if (ITEM == "printed_panel") {
+    printed_panel();
+} else if (ITEM == "mounting_bracket") {
+    mounting_bracket();
+} else {
+    echo("Usage: openscad -D <model> -o <output.stl> models.scad");
+    echo("Accepted model: printed_panel, mounting_bracket");
+}
