@@ -35,7 +35,7 @@ BOX_THICKNESS = in(1/4);
 PANEL_THICKNESS = mil(80);
 
 // Size of the controller
-OUTER_SIZE = [in(23), 225, 120];
+OUTER_SIZE = [in(23), 225, 95];
 
 FINGER_COUNT = [10, 5, 4];
 
