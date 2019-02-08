@@ -10,8 +10,8 @@ PREVIEW = true;
 // Set this to true when PREVIEW=false generates layer for laser engraving
 // (mainly for position of screw holes so they can be drilled later)
 ENGRAVE = false;
-// box1, box2, box3 were intended to be cut from wood, panel1 was
-// intended to be cut from acrylic
+// box1, box2, box3 are intended to be cut from plywood, panel1 is
+// intended to be cut from acrylic (or PC)
 SHEET = "box1";
 // Size of panel sheet and box sheets (for reference only)
 SHEET_PANEL = [in(24), in(18)];
@@ -571,6 +571,10 @@ if (PREVIEW) {
         box2_2d();
     } else if (SHEET == "box3") {
         box3_2d();
+    } else {
+        echo("SHEET is undefined or invalid.");
+        echo("Valid options: panel1, box1, box2, box3.");
+        echo("No shape will be generated.");
     }
 }
 
