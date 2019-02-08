@@ -7,6 +7,8 @@ use <models.scad>
 
 // Set this to true to get a 3D preview of the assembled controller
 PREVIEW = true;
+_PREVIEW = $preview == undef || $preview == true ? PREVIEW : false;
+
 // Set this to true when PREVIEW=false generates layer for laser engraving
 // (mainly for position of screw holes so they can be drilled later)
 ENGRAVE = false;
@@ -465,8 +467,8 @@ module box3_2d() {
     }
 }
 
-if (PREVIEW) {
-    echo("WARNING: This is just a preview. Set PREVIEW=false to get laser cuttable shapes.");
+if (_PREVIEW) {
+    //echo("WARNING: This is just a preview. Set PREVIEW=false to get laser cuttable shapes.");
     if (PREVIEW_VISIBILITY[BOTTOM]) {
         color("Green",0.5) difference() {
             box_bottom();
