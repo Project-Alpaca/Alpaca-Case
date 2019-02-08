@@ -29,10 +29,10 @@ module footprint_softpot_mount(softpot_length=500, softpot_width=20, padding=20,
     module _screw_holes() {
         offset_x = half_l + screw_hole_offset_from_pot;
         offset_y = half_w + screw_hole_offset_from_pot;
-        translate([-offset_x, -offset_y]) circle(d=3.2, center=true);
-        translate([offset_x, -offset_y]) circle(d=3.2, center=true);
-        translate([-offset_x, offset_y]) circle(d=3.2, center=true);
-        translate([offset_x, offset_y]) circle(d=3.2, center=true);
+        translate([-offset_x, -offset_y]) circle(d=3.2);
+        translate([offset_x, -offset_y]) circle(d=3.2);
+        translate([-offset_x, offset_y]) circle(d=3.2);
+        translate([offset_x, offset_y]) circle(d=3.2);
     }
 
     module _tail_cut() {
@@ -66,10 +66,10 @@ module footprint_1602() {
 module footprint_1602_eng() {
     %square([80, 36], center=true);
     translate([-80/2, -36/2, 0]) {
-        translate([2.5, 2.5, 0]) circle(d=3.2, center=true);
-        translate([80-2.5, 36-2.5, 0]) circle(d=3.2, center=true);
-        translate([80-2.5, 2.5, 0]) circle(d=3.2, center=true);
-        translate([2.5, 36-2.5, 0]) circle(d=3.2, center=true);
+        translate([2.5, 2.5, 0]) circle(d=3.2);
+        translate([80-2.5, 36-2.5, 0]) circle(d=3.2);
+        translate([80-2.5, 2.5, 0]) circle(d=3.2);
+        translate([2.5, 36-2.5, 0]) circle(d=3.2);
     }
 }
 
@@ -81,17 +81,17 @@ module footprint_control() {
 module footprint_control_eng() {
     %square([70, 30], center=true);
     translate([-70/2, -30/2, 0]) {
-        translate([2.5, 2.5]) circle(d=3.2, center=true);
-        translate([70-2.5, 30-2.5, 0]) circle(d=3.2, center=true);
-        translate([70-2.5, 2.5, 0]) circle(d=3.2, center=true);
-        translate([2.5, 30-2.5, 0]) circle(d=3.2, center=true);
+        translate([2.5, 2.5]) circle(d=3.2);
+        translate([70-2.5, 30-2.5, 0]) circle(d=3.2);
+        translate([70-2.5, 2.5, 0]) circle(d=3.2);
+        translate([2.5, 30-2.5, 0]) circle(d=3.2);
     }
 }
 
 module footprint_re() {
     %square([26, 19], center=true);
     translate([-3, 1.5]) {
-        circle(d=7, center=true);
+        circle(d=7);
         translate([-6, 0]) {
             square([1, 2], center=true);
         }
@@ -100,16 +100,16 @@ module footprint_re() {
 
 module footprint_re_eng() {
     %square([26, 19], center=true);
-    //translate([-3, 1.5]) circle(d=7, center=true);
+    //translate([-3, 1.5]) circle(d=7);
     translate([-26/2, -19/2, 0]) {
-        translate([4.5, 2.5]) circle(d=3.2, center=true);
-        translate([26-4.5, 2.5]) circle(d=3.2, center=true);
+        translate([4.5, 2.5]) circle(d=3.2);
+        translate([26-4.5, 2.5]) circle(d=3.2);
     }
 }
 module footprint_adafruit_908_ref() {
     translate([-14, 0]) hull() {
-        circle(d=12, center=true);
-        translate([28, 0]) circle(d=12, center=true);
+        circle(d=12);
+        translate([28, 0]) circle(d=12);
     }
 }
 
@@ -120,19 +120,19 @@ module footprint_adafruit_908() {
 
 module footprint_adafruit_908_eng() {
     %footprint_adafruit_908_ref();
-    translate([15, 0]) circle(d=in(7/64), center=true);
-    translate([-15, 0]) circle(d=in(7/64), center=true);
+    translate([15, 0]) circle(d=in(7/64));
+    translate([-15, 0]) circle(d=in(7/64));
 }
 
 module footprint_adafruit_3258_ref() {
     union() {
         translate([-8.5, 0]) hull() {
-            circle(d=8, center=true);
-            translate([17, 0]) circle(d=8, center=true);
+            circle(d=8);
+            translate([17, 0]) circle(d=8);
         }
         minkowski() {
             square([12-4, 10-4], center=true);
-            circle(r=2, center=true);
+            circle(r=2);
         }
     }
 }
@@ -144,11 +144,11 @@ module footprint_adafruit_3258() {
 
 module footprint_adafruit_3258_eng() {
     %footprint_adafruit_3258_ref();
-    translate([-9, 0]) circle(d=in(7/64), center=true);
-    translate([9, 0]) circle(d=in(7/64), center=true);
+    translate([-9, 0]) circle(d=in(7/64));
+    translate([9, 0]) circle(d=in(7/64));
 }
 module footprint_tensility_54_00063() {
-    circle(d=11, center=true);
+    circle(d=11);
 }
 
 module footprint_back_panel() {
@@ -166,10 +166,10 @@ module footprint_back_panel() {
 module footprint_back_panel_eng() {
     translate([20, 0, 0]) rotate([0, 0, 90]) footprint_adafruit_3258_eng();
     rotate([0, 0, 90]) footprint_adafruit_908_eng();
-    translate([34.5, 22]) circle(d=3.2, center=true);
-    translate([-34.5, 22]) circle(d=3.2, center=true);
-    translate([34.5, -22]) circle(d=3.2, center=true);
-    translate([-34.5, -22]) circle(d=3.2, center=true);
+    translate([34.5, 22]) circle(d=3.2);
+    translate([-34.5, 22]) circle(d=3.2);
+    translate([34.5, -22]) circle(d=3.2);
+    translate([-34.5, -22]) circle(d=3.2);
 }
 
 module footprint_back_panel_cutout() {
@@ -177,8 +177,8 @@ module footprint_back_panel_cutout() {
 }
 
 module footprint_back_panel_cutout_eng() {
-    translate([34.5, 22]) circle(d=3.2, center=true);
-    translate([-34.5, 22]) circle(d=3.2, center=true);
-    translate([34.5, -22]) circle(d=3.2, center=true);
-    translate([-34.5, -22]) circle(d=3.2, center=true);
+    translate([34.5, 22]) circle(d=3.2);
+    translate([-34.5, 22]) circle(d=3.2);
+    translate([34.5, -22]) circle(d=3.2);
+    translate([-34.5, -22]) circle(d=3.2);
 }

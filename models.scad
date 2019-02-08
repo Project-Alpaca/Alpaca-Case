@@ -15,7 +15,7 @@ module printed_panel() {
 module mounting_bracket() {
     module quadrant(r) {
         difference() {
-            circle(r=r, center=true);
+            circle(r=r);
             polygon([
                 [0, 0],
                 [0, r],
@@ -34,14 +34,14 @@ module mounting_bracket() {
                     if (nut) {
                         circle(d=6*(1/cos(30)), $fn=6);
                     } else {
-                        circle(d=3.2, center=true);
+                        circle(d=3.2);
                     }
                 }
                 translate([0, 15]) {
                     if (nut) {
                         circle(d=6*(1/cos(30)), $fn=6);
                     } else {
-                        circle(d=3.2, center=true);
+                        circle(d=3.2);
                     }
                 }
             }

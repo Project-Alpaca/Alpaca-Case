@@ -58,9 +58,9 @@ MOUNTING = 7;
 PIVOT = 8;
 
 module corner_screw_holes(x, y) {
-    //translate([0, 0, 0]) circle(d=3.2, center=true);
-    translate([x, 0, 0]) circle(d=3.2, center=true);
-    translate([0, y, 0]) circle(d=3.2, center=true);
+    //translate([0, 0, 0]) circle(d=3.2);
+    translate([x, 0, 0]) circle(d=3.2);
+    translate([0, y, 0]) circle(d=3.2);
 }
 
 module box_bottom() {
@@ -310,8 +310,8 @@ module rect_ft_panel() {
 
     // TODO move screw holes to drill layer
     //module _screw_holes(x, y) {
-    //    translate([x, 0, 0]) circle(d=3.5, center=true);
-    //    translate([0, y, 0]) circle(d=3.5, center=true);
+    //    translate([x, 0, 0]) circle(d=3.5);
+    //    translate([0, y, 0]) circle(d=3.5);
     //}
     //difference() {
         square([_l, _h]);
