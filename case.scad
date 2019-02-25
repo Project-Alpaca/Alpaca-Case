@@ -3,18 +3,17 @@ include <footprints.scad>
 include <imperial.scad>
 use <models.scad>
 
-// Build flags
-
+/* [Viewer Options] */
 // Set this to true to get a 3D preview of the assembled controller
 PREVIEW = true;
 _PREVIEW = $preview == undef || $preview == true ? PREVIEW : false;
 
-// Set this to true when PREVIEW=false generates layer for laser engraving
-// (mainly for position of screw holes so they can be drilled later)
+// Set this to true when PREVIEW=false generates layer for laser engraving (mainly for position of screw holes so they can be drilled later)
 ENGRAVE = false;
-// box1, box2, box3 are intended to be cut from plywood, panel1 is
-// intended to be cut from acrylic (or PC)
-SHEET = "box1";
+
+// box1, box2, box3 are intended to be cut from plywood, panel1 is intended to be cut from acrylic (or PC)
+SHEET = "box1"; // [box1, box2, box3, panel1]
+
 // Size of panel sheet and box sheets (for reference only)
 SHEET_PANEL = [in(24), in(18)];
 SHEET_BOX = [in(24), in(16)];
@@ -32,6 +31,10 @@ PREVIEW_VISIBILITY = [
     true, // pivot
 ];
 
+/* [Hidden] */
+
+// Dimension settings
+
 // Thickness of sheets
 BOX_THICKNESS = in(1/4);
 PANEL_THICKNESS = mil(80);
@@ -45,6 +48,7 @@ MAIN_BUTTON_DIST = 125;
 MAIN_BUTTON_OFFSET_X = 130;
 MAIN_BUTTON_OFFSET_Y = 75;
 
+// Internal use only. Do not change.
 X = 0;
 Y = 1;
 Z = 2;
