@@ -506,6 +506,28 @@ if (_PREVIEW) {
         }
     }
 
+    if (PREVIEW_PIVOT) {
+        color("Red", 0.5)
+            translate([OUTER_SIZE.x/2+BOX_THICKNESS/2,0,BOX_THICKNESS])
+            rotate([0, -90, 0])
+                box_pivot();
+    }
+
+    if (PREVIEW_MOUNTING) {
+        translate([0, 0, OUTER_SIZE.z-PANEL_THICKNESS])
+            rotate([-90, 0, 0])
+            mounting_bracket();
+        translate([0, OUTER_SIZE.y, OUTER_SIZE.z-PANEL_THICKNESS])
+            rotate([-90, 0, -90])
+            mounting_bracket();
+        translate([OUTER_SIZE.x, 0, OUTER_SIZE.z-PANEL_THICKNESS])
+            rotate([-90, 0, -270])
+            mounting_bracket();
+        translate([OUTER_SIZE.x, OUTER_SIZE.y, OUTER_SIZE.z-PANEL_THICKNESS])
+            rotate([-90, 0, -180])
+            mounting_bracket();
+    }
+
     if (PREVIEW_LEFT_WALL) {
         color("Magenta",0.5)
             translate([0,0,BOX_THICKNESS])
@@ -546,13 +568,6 @@ if (_PREVIEW) {
             }
     }
 
-    if (PREVIEW_PIVOT) {
-        color("Red", 0.5)
-            translate([OUTER_SIZE.x/2+BOX_THICKNESS/2,0,BOX_THICKNESS])
-            rotate([0, -90, 0])
-                box_pivot();
-    }
-
     if (PREVIEW_TOP_COVER) {
         color("Yellow", 0.5)
             translate([0, 0, OUTER_SIZE.z-PANEL_THICKNESS])
@@ -577,21 +592,6 @@ if (_PREVIEW) {
                     eng_panel();
                 }
             }
-    }
-
-    if (PREVIEW_MOUNTING) {
-        translate([0, 0, OUTER_SIZE.z-PANEL_THICKNESS])
-            rotate([-90, 0, 0])
-            mounting_bracket();
-        translate([0, OUTER_SIZE.y, OUTER_SIZE.z-PANEL_THICKNESS])
-            rotate([-90, 0, -90])
-            mounting_bracket();
-        translate([OUTER_SIZE.x, 0, OUTER_SIZE.z-PANEL_THICKNESS])
-            rotate([-90, 0, -270])
-            mounting_bracket();
-        translate([OUTER_SIZE.x, OUTER_SIZE.y, OUTER_SIZE.z-PANEL_THICKNESS])
-            rotate([-90, 0, -180])
-            mounting_bracket();
     }
 
 } else {
