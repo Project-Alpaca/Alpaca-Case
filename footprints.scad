@@ -182,3 +182,22 @@ module footprint_back_panel_cutout_eng() {
     translate([34.5, -22]) circle(d=3.2);
     translate([-34.5, -22]) circle(d=3.2);
 }
+
+module footprint_tp_contact_notch() {
+    module side_notch() {
+        union() {
+            square([4, 14], center=true);
+            translate([0, 5-4/2]) square([5+4/2, 4], center=false);
+            translate([0, -5-4/2]) square([5+4/2, 4], center=false);
+        }
+    }
+
+    translate([-50, 0]) side_notch();
+    translate([50, 0]) mirror([1, 0]) side_notch();
+
+    translate([-25, 5]) square([15, 4], center=true);
+    translate([25, -5]) square([15, 4], center=true);
+    translate([-25, -5]) square([15, 4], center=true);
+    translate([25, 5]) square([15, 4], center=true);
+    translate([0, 5]) square([10, 4], center=true);
+}

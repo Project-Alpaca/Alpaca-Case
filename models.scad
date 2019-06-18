@@ -72,6 +72,6 @@ if (ITEM == "printed_panel") {
 } else if (ITEM == "mounting_bracket") {
     mounting_bracket();
 } else {
-    echo("Usage: openscad -D <model> -o <output.stl> models.scad");
+    echo("Usage: openscad -DITEM=model -o output.stl models.scad");
     echo("Accepted model: printed_panel, mounting_bracket");
 }

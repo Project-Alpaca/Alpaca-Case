@@ -18,18 +18,18 @@ SHEET = "box1"; // [box1, box2, box3, panel1]
 SHEET_PANEL = [in(24), in(18)];
 SHEET_BOX = [in(24), in(16)];
 
+/* [Preview Visibility] */
 // Sets visibility of objects in preview
-PREVIEW_VISIBILITY = [
-    true, // front
-    true, // back
-    true, // left
-    true, // right
-    true, // top cover
-    true, // top panel
-    true, // bottom
-    true, // mounting brackets
-    true, // pivot
-];
+
+PREVIEW_FRONT_WALL = true;
+PREVIEW_BACK_WALL = true;
+PREVIEW_LEFT_WALL = true;
+PREVIEW_RIGHT_WALL = true;
+PREVIEW_TOP_COVER = true;
+PREVIEW_TOP_PANEL = true;
+PREVIEW_BOTTOM = true;
+PREVIEW_MOUNTING = true;
+PREVIEW_PIVOT = true;
 
 /* [Hidden] */
 
@@ -47,6 +47,9 @@ FINGER_COUNT = [10, 5, 4];
 MAIN_BUTTON_DIST = 125;
 MAIN_BUTTON_OFFSET_X = 130;
 MAIN_BUTTON_OFFSET_Y = 75;
+
+// Controller model (SPM = SoftPot, LKP = Capacitive)
+CONTROLLER_MODEL = "SPM";
 
 // Internal use only. Do not change.
 
@@ -66,6 +69,7 @@ module corner_screw_holes(x, y) {
     translate([0, y, 0]) circle(d=3.2);
 }
 
+// Botton side (vector cutting layer)
 module box_bottom() {
     pivot_tab_x = OUTER_SIZE.x/2-BOX_THICKNESS/2;
     pivot_tab_y = OUTER_SIZE.y;
@@ -93,6 +97,7 @@ module box_bottom() {
                       ]);
 }
 
+// Bottom side (engraving layer)
 module eng_box_bottom() {
     translate([15, 15, 0]) corner_screw_holes(15, 15);
     translate([OUTER_SIZE.x-15, OUTER_SIZE.y-15, 0]) corner_screw_holes(-15, -15);
@@ -100,6 +105,7 @@ module eng_box_bottom() {
     translate([15, OUTER_SIZE.y-15, 0]) corner_screw_holes(15, -15);
 }
 
+// Top side (vector cutting layer)
 module box_top() {
     cut_x = (635-OUTER_SIZE[0])/2;
     pivot_tab_x = OUTER_SIZE.x/2-BOX_THICKNESS/2;
@@ -133,13 +139,15 @@ module box_top() {
         translate([-cut_x, 0, 0])
             translate([MAIN_BUTTON_OFFSET_X, MAIN_BUTTON_OFFSET_Y, 0])
             translate([1.5*MAIN_BUTTON_DIST, 115, 0])
-            translate([0, 10-32-6, 0])
-            linear_extrude(BOX_THICKNESS) {
-                footprint_softpot_mount(invert=true, holes=false);
-            }
+            %square([510, 64], true);
+            //translate([0, 10-32-6, 0])
+            //linear_extrude(BOX_THICKNESS) {
+            //    footprint_softpot_mount(invert=true, holes=false);
+            //}
     }
 }
 
+// Top side (engraving layer)
 module eng_box_top() {
     cut_x = (635-OUTER_SIZE[0])/2;
     translate([15, 15, 0]) corner_screw_holes(15, 15);
@@ -160,6 +168,7 @@ module eng_box_top() {
         }
 }
 
+// Left/right side (vector cutting layer)
 module box_side_lr() {
     lasercutoutSquare(thickness=BOX_THICKNESS,
                       x=OUTER_SIZE.z,
@@ -174,6 +183,7 @@ module box_side_lr() {
                       ]);
 }
 
+// Left/right side (engraving layer)
 module eng_box_side_lr() {
     translate([15, 15, 0]) corner_screw_holes(15, 15);
     translate([OUTER_SIZE.z-PANEL_THICKNESS-BOX_THICKNESS-15, OUTER_SIZE.y-15, 0]) corner_screw_holes(-15, -15);
@@ -181,6 +191,7 @@ module eng_box_side_lr() {
     translate([15, OUTER_SIZE.y-15, 0]) corner_screw_holes(15, -15);
 }
 
+// Front side (vector cutting layer)
 module box_side_f() {
     // TODO auxiliary control panel
     pivot_tab_x = OUTER_SIZE.x/2-BOX_THICKNESS/2;
@@ -212,6 +223,7 @@ module box_side_f() {
     }
 }
 
+// Front side (engraving layer)
 module eng_box_side_f() {
     translate([5/8*OUTER_SIZE.x, OUTER_SIZE.z/2, 0]) {
         footprint_1602_eng();
@@ -225,6 +237,7 @@ module eng_box_side_f() {
         footprint_control_eng();
 }
 
+// Back side (vector cutting layer)
 module box_side_b() {
     pivot_tab_x = OUTER_SIZE.x/2-BOX_THICKNESS/2;
     pivot_tab_y = OUTER_SIZE.z-PANEL_THICKNESS-BOX_THICKNESS;
@@ -251,6 +264,7 @@ module box_side_b() {
     }
 }
 
+// Back side (engraving layer)
 module eng_box_side_b() {
     translate([OUTER_SIZE.x-15, OUTER_SIZE.z-PANEL_THICKNESS-BOX_THICKNESS-15, 0]) corner_screw_holes(-15, -15);
     translate([15, OUTER_SIZE.z-PANEL_THICKNESS-BOX_THICKNESS-15, 0]) corner_screw_holes(15, -15);
@@ -261,6 +275,7 @@ module eng_box_side_b() {
     }
 }
 
+// Pivot (legacy)
 module box_pivot() {
     x = OUTER_SIZE.z-PANEL_THICKNESS-BOX_THICKNESS;
     y = OUTER_SIZE.y;
@@ -292,6 +307,20 @@ module box_pivot() {
                       ]);
 }
 
+// Horizontal pivot (between slider and main buttons)
+module box_pivot_h() {
+    
+}
+
+// Vertical pivot (between main buttons)
+module box_pivot_v_button() {
+    
+}
+
+// Support platform for capacitive slider module
+module box_lkp_platform() {
+    
+}
 
 // Stock panel shape. Build using this may be more challenging than using the
 // simplified rectangular panel
@@ -352,7 +381,7 @@ module softpot_mount() {
 module panel_base() {
     translate([-MAIN_BUTTON_OFFSET_X, -MAIN_BUTTON_OFFSET_Y, 0]) {
         // Panel reference
-        //%stock_ft_panel();
+        %stock_ft_panel();
         rect_ft_panel();
     }
 }
@@ -470,14 +499,14 @@ module box3_2d() {
 
 if (_PREVIEW) {
     //echo("WARNING: This is just a preview. Set PREVIEW=false to get laser cuttable shapes.");
-    if (PREVIEW_VISIBILITY[BOTTOM]) {
+    if (PREVIEW_BOTTOM) {
         color("Green",0.5) difference() {
             box_bottom();
             linear_extrude(BOX_THICKNESS) eng_box_bottom();
         }
     }
 
-    if (PREVIEW_VISIBILITY[LEFT_WALL]) {
+    if (PREVIEW_LEFT_WALL) {
         color("Magenta",0.5)
             translate([0,0,BOX_THICKNESS])
             rotate([0, -90, 0])
@@ -487,7 +516,7 @@ if (_PREVIEW) {
             }
     }
 
-    if (PREVIEW_VISIBILITY[RIGHT_WALL]) {
+    if (PREVIEW_RIGHT_WALL) {
         color("Cyan",0.5)
             translate([OUTER_SIZE.x,OUTER_SIZE.y,BOX_THICKNESS])
             rotate([0, -90, 180])
@@ -497,7 +526,7 @@ if (_PREVIEW) {
             }
     }
 
-    if (PREVIEW_VISIBILITY[FRONT_WALL]) {
+    if (PREVIEW_FRONT_WALL) {
         color("Orange", 0.5)
             translate([0,0,BOX_THICKNESS])
             rotate([90, 0, 0])
@@ -507,7 +536,7 @@ if (_PREVIEW) {
             }
     }
 
-    if (PREVIEW_VISIBILITY[BACK_WALL]) {
+    if (PREVIEW_BACK_WALL) {
         color("Purple", 0.5)
             translate([0,OUTER_SIZE.y+BOX_THICKNESS,BOX_THICKNESS])
             rotate([90, 0, 0])
@@ -517,14 +546,14 @@ if (_PREVIEW) {
             }
     }
 
-    if (PREVIEW_VISIBILITY[PIVOT]) {
+    if (PREVIEW_PIVOT) {
         color("Red", 0.5)
             translate([OUTER_SIZE.x/2+BOX_THICKNESS/2,0,BOX_THICKNESS])
             rotate([0, -90, 0])
                 box_pivot();
     }
 
-    if (PREVIEW_VISIBILITY[TOP_COVER]) {
+    if (PREVIEW_TOP_COVER) {
         color("Yellow", 0.5)
             translate([0, 0, OUTER_SIZE.z-PANEL_THICKNESS])
             difference() {
@@ -533,7 +562,7 @@ if (_PREVIEW) {
             }
     }
 
-    if (PREVIEW_VISIBILITY[TOP_PANEL]) {
+    if (PREVIEW_TOP_PANEL) {
         color("Grey", 0.5)
             translate([0, 0, OUTER_SIZE.z+BOX_THICKNESS-PANEL_THICKNESS])
             linear_extrude(PANEL_THICKNESS) {
@@ -550,7 +579,7 @@ if (_PREVIEW) {
             }
     }
 
-    if (PREVIEW_VISIBILITY[MOUNTING]) {
+    if (PREVIEW_MOUNTING) {
         translate([0, 0, OUTER_SIZE.z-PANEL_THICKNESS])
             rotate([-90, 0, 0])
             mounting_bracket();
