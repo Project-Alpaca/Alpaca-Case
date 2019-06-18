@@ -21,14 +21,23 @@ SHEET_BOX = [in(24), in(16)];
 /* [Preview Visibility] */
 // Sets visibility of objects in preview
 
+// Front
 PREVIEW_FRONT_WALL = true;
+// Back
 PREVIEW_BACK_WALL = true;
+// Left
 PREVIEW_LEFT_WALL = true;
+// Right
 PREVIEW_RIGHT_WALL = true;
+// Top cover
 PREVIEW_TOP_COVER = true;
+// Top panel
 PREVIEW_TOP_PANEL = true;
+// Bottom
 PREVIEW_BOTTOM = true;
+// Mounting brackets
 PREVIEW_MOUNTING = true;
+// Pivots
 PREVIEW_PIVOT = true;
 
 /* [Hidden] */
@@ -62,6 +71,8 @@ TOP_PANEL = 5;
 BOTTOM = 6;
 MOUNTING = 7;
 PIVOT = 8;
+
+EPSILON = .001;
 
 module corner_screw_holes(x, y) {
     //translate([0, 0, 0]) circle(d=3.2);
@@ -212,13 +223,13 @@ module box_side_f() {
                               [MID, pivot_tab_x, pivot_tab_y*2/4-BOX_THICKNESS/2],
                               [MID, pivot_tab_x, pivot_tab_y*3/4-BOX_THICKNESS/2],
                           ]);
-        translate([5/8*OUTER_SIZE.x, OUTER_SIZE.z/2, 0])
-            linear_extrude(BOX_THICKNESS) {
+        translate([5/8*OUTER_SIZE.x, OUTER_SIZE.z/2, -EPSILON])
+            linear_extrude(BOX_THICKNESS+2*EPSILON) {
                 footprint_1602();
                 translate([70+3, -1.5]) footprint_re();
             }
-        translate([55/64*OUTER_SIZE.x, OUTER_SIZE.z/2, 0])
-            linear_extrude(BOX_THICKNESS)
+        translate([55/64*OUTER_SIZE.x, OUTER_SIZE.z/2, -EPSILON])
+            linear_extrude(BOX_THICKNESS+2*EPSILON)
             footprint_control();
     }
 }
@@ -258,8 +269,8 @@ module box_side_b() {
                               [MID, pivot_tab_x, pivot_tab_y*2/4-BOX_THICKNESS/2],
                               [MID, pivot_tab_x, pivot_tab_y*3/4-BOX_THICKNESS/2],
                           ]);
-        translate([OUTER_SIZE.x/4*3, OUTER_SIZE.z/3]) {
-            linear_extrude(BOX_THICKNESS) footprint_back_panel_cutout();
+        translate([OUTER_SIZE.x/4*3, OUTER_SIZE.z/3, -EPSILON]) {
+            linear_extrude(BOX_THICKNESS+2*EPSILON) footprint_back_panel_cutout();
         }
     }
 }
@@ -354,7 +365,7 @@ module rect_ft_panel() {
     //}
 }
 
-module cuts() {
+module panel_cuts() {
     for (i=[0:MAIN_BUTTON_DIST:MAIN_BUTTON_DIST*3]) {
         translate([i, 0, 0]) {
             // Button position reference
@@ -381,7 +392,7 @@ module softpot_mount() {
 module panel_base() {
     translate([-MAIN_BUTTON_OFFSET_X, -MAIN_BUTTON_OFFSET_Y, 0]) {
         // Panel reference
-        %stock_ft_panel();
+        //%stock_ft_panel();
         rect_ft_panel();
     }
 }
@@ -392,7 +403,7 @@ module panel() {
     translate([-cut_x, 0, 0]) difference() {
         translate([MAIN_BUTTON_OFFSET_X, MAIN_BUTTON_OFFSET_Y, 0]) difference() {
             panel_base();
-            cuts();
+            panel_cuts();
             translate([1.5*MAIN_BUTTON_DIST, 115, 0]) translate([0, 10-32-6, 0]) footprint_softpot_mount(holes=false);
         }
         square([(635-OUTER_SIZE[0])/2, 225]);
@@ -502,7 +513,7 @@ if (_PREVIEW) {
     if (PREVIEW_BOTTOM) {
         color("Green",0.5) difference() {
             box_bottom();
-            linear_extrude(BOX_THICKNESS) eng_box_bottom();
+            translate([0, 0, -EPSILON]) linear_extrude(BOX_THICKNESS+2*EPSILON) eng_box_bottom();
         }
     }
 
@@ -534,7 +545,7 @@ if (_PREVIEW) {
             rotate([0, -90, 0])
             difference() {
                 box_side_lr();
-                linear_extrude(BOX_THICKNESS) eng_box_side_lr();
+                translate([0, 0, -EPSILON]) linear_extrude(BOX_THICKNESS+2*EPSILON) eng_box_side_lr();
             }
     }
 
@@ -544,7 +555,7 @@ if (_PREVIEW) {
             rotate([0, -90, 180])
             difference() {
                 box_side_lr();
-                linear_extrude(BOX_THICKNESS) eng_box_side_lr();
+                translate([0, 0, -EPSILON]) linear_extrude(BOX_THICKNESS+2*EPSILON) eng_box_side_lr();
             }
     }
 
@@ -554,7 +565,7 @@ if (_PREVIEW) {
             rotate([90, 0, 0])
             difference() {
                 box_side_f();
-                linear_extrude(BOX_THICKNESS) eng_box_side_f();
+                translate([0, 0, -EPSILON]) linear_extrude(BOX_THICKNESS+2*EPSILON) eng_box_side_f();
             }
     }
 
@@ -564,7 +575,7 @@ if (_PREVIEW) {
             rotate([90, 0, 0])
             difference() {
                 box_side_b();
-                linear_extrude(BOX_THICKNESS) eng_box_side_b();
+                translate([0, 0, -EPSILON]) linear_extrude(BOX_THICKNESS+2*EPSILON) eng_box_side_b();
             }
     }
 
