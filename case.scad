@@ -72,7 +72,7 @@ BOTTOM = 6;
 MOUNTING = 7;
 PIVOT = 8;
 
-EPSILON = .001;
+EPSILON = .01;
 
 module corner_screw_holes(x, y) {
     //translate([0, 0, 0]) circle(d=3.2);
@@ -80,7 +80,7 @@ module corner_screw_holes(x, y) {
     translate([0, y, 0]) circle(d=3.2);
 }
 
-// Botton side (vector cutting layer)
+// Bottom side (vector cutting layer)
 module box_bottom() {
     pivot_tab_x = OUTER_SIZE.x/2-BOX_THICKNESS/2;
     pivot_tab_y = OUTER_SIZE.y;
@@ -125,13 +125,6 @@ module box_top() {
         lasercutoutSquare(thickness=BOX_THICKNESS,
                           x=OUTER_SIZE.x,
                           y=OUTER_SIZE.y,
-                          simple_tab_holes=[
-                              [MID, pivot_tab_x, pivot_tab_y/6-BOX_THICKNESS/2],
-                              [MID, pivot_tab_x, pivot_tab_y*2/6-BOX_THICKNESS/2],
-                              [MID, pivot_tab_x, pivot_tab_y*3/6-BOX_THICKNESS/2],
-                              [MID, pivot_tab_x, pivot_tab_y*4/6-BOX_THICKNESS/2],
-                              [MID, pivot_tab_x, pivot_tab_y*5/6-BOX_THICKNESS/2]
-                          ],
                           circles_remove=[
                               [ARCADE_BUTTON_100MM_HOLE_DIA/2, MAIN_BUTTON_OFFSET_X-cut_x, MAIN_BUTTON_OFFSET_Y],
                               [ARCADE_BUTTON_100MM_HOLE_DIA/2, MAIN_BUTTON_OFFSET_X-cut_x+MAIN_BUTTON_DIST, MAIN_BUTTON_OFFSET_Y],
@@ -305,13 +298,6 @@ module box_pivot() {
                           [LEFT, 0, y*3/6],
                           [LEFT, 0, y*4/6],
                           [LEFT, 0, y*5/6],
-                          // TODO this does not work well, bug in lasercut
-                          // library?
-                          [RIGHT, x, y/6],
-                          [RIGHT, x, y*2/6],
-                          [RIGHT, x, y*3/6],
-                          [RIGHT, x, y*4/6],
-                          [RIGHT, x, y*5/6]
                       ],
                       circles_remove=[
                           [20, x/2, y/2]
