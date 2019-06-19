@@ -450,11 +450,11 @@ module box1_2d() {
         translate([BOX_THICKNESS, BOX_THICKNESS*2+BOX_SIZE.y])
             eng_box_side_f();
     } else {
+        // Box top is native 2D and projection() is not needed
+        box_top();
         projection() {
-            box_top();
             translate([BOX_THICKNESS, BOX_THICKNESS*2+BOX_SIZE.y])
                 box_side_f();
-            //translate([BOX_THICKNESS, BOX_THICKNESS*2+BOX_SIZE.y, 0]) box_bottom();
         }
     }
 }
