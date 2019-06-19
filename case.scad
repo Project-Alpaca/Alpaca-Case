@@ -5,10 +5,10 @@ use <models.scad>
 
 /* [Viewer Options] */
 // Set this to true to get a 3D preview of the assembled controller
-PREVIEW = true;
-_PREVIEW = $preview == undef || $preview == true ? PREVIEW : false;
+PREVIEW_3D = true;
+_PREVIEW = $preview == undef || $preview == true ? PREVIEW_3D : false;
 
-// Set this to true when PREVIEW=false generates layer for laser engraving (mainly for position of screw holes so they can be drilled later)
+// Set this to true when PREVIEW_3D=false generates layer for laser engraving (mainly for position of screw holes so they can be drilled later)
 ENGRAVE = false;
 
 // box1, box2, box3 are intended to be cut from plywood, panel1 is intended to be cut from acrylic (or PC)
@@ -48,17 +48,45 @@ PREVIEW_PIVOT = true;
 BOX_THICKNESS = in(1/4);
 PANEL_THICKNESS = mil(80);
 
-// Size of the controller
-OUTER_SIZE = [in(23), 225, 95];
+// Size of the inner box (without accounting controller panel)
+BOX_SIZE = [in(23), 225, 95];
+PANEL_SIZE_REF = [635, 225];
+
+// Size of the outer edge
+OUTER_SIZE = [
+    BOX_SIZE.x + 2*BOX_THICKNESS,
+    BOX_SIZE.y + 2*BOX_THICKNESS,
+    // no tabs for z axis
+    BOX_SIZE.z + BOX_THICKNESS
+];
+// Size of the inner box (minus controller panel thickness)
+INNER_SIZE = [
+    BOX_SIZE.x,
+    BOX_SIZE.y,
+    BOX_SIZE.z - BOX_THICKNESS - PANEL_THICKNESS
+];
 
 FINGER_COUNT = [10, 5, 4];
 
-MAIN_BUTTON_DIST = 125;
-MAIN_BUTTON_OFFSET_X = 130;
-MAIN_BUTTON_OFFSET_Y = 75;
+BUTTON_DIST = 125;
+BUTTON_OFFSET_REF = [130, 75];
+BUTTON_OFFSET = [
+    BUTTON_OFFSET_REF.x - ((PANEL_SIZE_REF.x - BOX_SIZE.x) / 2),
+    BUTTON_OFFSET_REF.y - ((PANEL_SIZE_REF.y - BOX_SIZE.y) / 2),
+];
+BUTTON_R_WITH_NOTCH = (ARCADE_BUTTON_100MM_HOLE_DIA + ARCADE_BUTTON_100MM_NOTCH_DIA) / 2;
+SLIDER_SIZE_REF = [500, 40];
+// Bottom of the slider, starts from the center of the buttons.
+SLIDER_BOTTOM_Y = 75;
+SLIDER_OFFSET_REF = [1.5*BUTTON_DIST, SLIDER_BOTTOM_Y + SLIDER_SIZE_REF.y/2];
+// Button sits at zero. Therefore teh gap between slider and button (hole) would be (the slider bottom offset - the button radius with notch)
+SLIDER_BUTTON_GAP_CENTER = SLIDER_BOTTOM_Y - ((SLIDER_BOTTOM_Y - BUTTON_R_WITH_NOTCH) / 2) + BUTTON_OFFSET.y;
 
 // Controller model (SPM = SoftPot, LKP = Capacitive)
 CONTROLLER_MODEL = "SPM";
+
+//SOFTPOT_WIDTH = 20;
+//SOFTPOT_DEADZONE_WIDTH = 6;
 
 // Internal use only. Do not change.
 
@@ -74,6 +102,9 @@ PIVOT = 8;
 
 EPSILON = .01;
 
+// Accounting for the thickness for lasercut boards
+function as_lcb_center(pos) = pos - BOX_THICKNESS/2;
+
 module corner_screw_holes(x, y) {
     //translate([0, 0, 0]) circle(d=3.2);
     translate([x, 0, 0]) circle(d=3.2);
@@ -82,86 +113,65 @@ module corner_screw_holes(x, y) {
 
 // Bottom side (vector cutting layer)
 module box_bottom() {
-    pivot_tab_x = OUTER_SIZE.x/2-BOX_THICKNESS/2;
-    pivot_tab_y = OUTER_SIZE.y;
+    pivot_tab_x = as_lcb_center(BOX_SIZE.x/2);
+    pivot_tab_y = BOX_SIZE.y;
     lasercutoutSquare(thickness=BOX_THICKNESS,
-                      x=OUTER_SIZE.x,
-                      y=OUTER_SIZE.y,
+                      x=BOX_SIZE.x,
+                      y=BOX_SIZE.y,
                       bumpy_finger_joints=[
                           [UP, 1, FINGER_COUNT.x],
                           [DOWN, 1, FINGER_COUNT.x],
                           [LEFT, 1, FINGER_COUNT.y],
                           [RIGHT, 1, FINGER_COUNT.y]
                       ],
+                      // Extended finger joints
                       simple_tabs=[
-                          [UP, -BOX_THICKNESS/2, OUTER_SIZE.y],
-                          [DOWN, OUTER_SIZE.x+BOX_THICKNESS/2, 0],
+                          [UP, -BOX_THICKNESS/2, BOX_SIZE.y],
+                          [DOWN, BOX_SIZE.x+BOX_THICKNESS/2, 0],
                           [LEFT, 0, -BOX_THICKNESS/2],
-                          [RIGHT, OUTER_SIZE.x, BOX_THICKNESS/2+OUTER_SIZE.y],
+                          [RIGHT, BOX_SIZE.x, BOX_THICKNESS/2+BOX_SIZE.y],
                       ],
                       simple_tab_holes=[
-                          [MID, pivot_tab_x, pivot_tab_y/6-BOX_THICKNESS/2],
-                          [MID, pivot_tab_x, pivot_tab_y*2/6-BOX_THICKNESS/2],
-                          [MID, pivot_tab_x, pivot_tab_y*3/6-BOX_THICKNESS/2],
-                          [MID, pivot_tab_x, pivot_tab_y*4/6-BOX_THICKNESS/2],
-                          [MID, pivot_tab_x, pivot_tab_y*5/6-BOX_THICKNESS/2]
+                          [MID, pivot_tab_x, as_lcb_center(pivot_tab_y/6)],
+                          [MID, pivot_tab_x, as_lcb_center(pivot_tab_y*2/6)],
+                          [MID, pivot_tab_x, as_lcb_center(pivot_tab_y*3/6)],
+                          [MID, pivot_tab_x, as_lcb_center(pivot_tab_y*4/6)],
+                          [MID, pivot_tab_x, as_lcb_center(pivot_tab_y*5/6)]
                       ]);
 }
 
 // Bottom side (engraving layer)
 module eng_box_bottom() {
     translate([15, 15, 0]) corner_screw_holes(15, 15);
-    translate([OUTER_SIZE.x-15, OUTER_SIZE.y-15, 0]) corner_screw_holes(-15, -15);
-    translate([OUTER_SIZE.x-15, 15, 0]) corner_screw_holes(-15, 15);
-    translate([15, OUTER_SIZE.y-15, 0]) corner_screw_holes(15, -15);
+    translate([BOX_SIZE.x-15, BOX_SIZE.y-15, 0]) corner_screw_holes(-15, -15);
+    translate([BOX_SIZE.x-15, 15, 0]) corner_screw_holes(-15, 15);
+    translate([15, BOX_SIZE.y-15, 0]) corner_screw_holes(15, -15);
 }
 
 // Top side (vector cutting layer)
 module box_top() {
-    cut_x = (635-OUTER_SIZE[0])/2;
-    pivot_tab_x = OUTER_SIZE.x/2-BOX_THICKNESS/2;
-    pivot_tab_y = OUTER_SIZE.y;
     difference() {
-        lasercutoutSquare(thickness=BOX_THICKNESS,
-                          x=OUTER_SIZE.x,
-                          y=OUTER_SIZE.y,
-                          circles_remove=[
-                              [ARCADE_BUTTON_100MM_HOLE_DIA/2, MAIN_BUTTON_OFFSET_X-cut_x, MAIN_BUTTON_OFFSET_Y],
-                              [ARCADE_BUTTON_100MM_HOLE_DIA/2, MAIN_BUTTON_OFFSET_X-cut_x+MAIN_BUTTON_DIST, MAIN_BUTTON_OFFSET_Y],
-                              [ARCADE_BUTTON_100MM_HOLE_DIA/2, MAIN_BUTTON_OFFSET_X-cut_x+MAIN_BUTTON_DIST*2, MAIN_BUTTON_OFFSET_Y],
-                              [ARCADE_BUTTON_100MM_HOLE_DIA/2, MAIN_BUTTON_OFFSET_X-cut_x+MAIN_BUTTON_DIST*3, MAIN_BUTTON_OFFSET_Y],
-                              // TODO make this parametric
-                              [ARCADE_BUTTON_100MM_NOTCH_DIA/2, MAIN_BUTTON_OFFSET_X-cut_x, MAIN_BUTTON_OFFSET_Y+ARCADE_BUTTON_100MM_HOLE_DIA/2],
-                              [ARCADE_BUTTON_100MM_NOTCH_DIA/2, MAIN_BUTTON_OFFSET_X-cut_x, MAIN_BUTTON_OFFSET_Y-ARCADE_BUTTON_100MM_HOLE_DIA/2],
-                              [ARCADE_BUTTON_100MM_NOTCH_DIA/2, MAIN_BUTTON_OFFSET_X-cut_x+MAIN_BUTTON_DIST, MAIN_BUTTON_OFFSET_Y+ARCADE_BUTTON_100MM_HOLE_DIA/2],
-                              [ARCADE_BUTTON_100MM_NOTCH_DIA/2, MAIN_BUTTON_OFFSET_X-cut_x+MAIN_BUTTON_DIST, MAIN_BUTTON_OFFSET_Y-ARCADE_BUTTON_100MM_HOLE_DIA/2],
-                              [ARCADE_BUTTON_100MM_NOTCH_DIA/2, MAIN_BUTTON_OFFSET_X-cut_x+MAIN_BUTTON_DIST*2, MAIN_BUTTON_OFFSET_Y+ARCADE_BUTTON_100MM_HOLE_DIA/2],
-                              [ARCADE_BUTTON_100MM_NOTCH_DIA/2, MAIN_BUTTON_OFFSET_X-cut_x+MAIN_BUTTON_DIST*2, MAIN_BUTTON_OFFSET_Y-ARCADE_BUTTON_100MM_HOLE_DIA/2],
-                              [ARCADE_BUTTON_100MM_NOTCH_DIA/2, MAIN_BUTTON_OFFSET_X-cut_x+MAIN_BUTTON_DIST*3, MAIN_BUTTON_OFFSET_Y+ARCADE_BUTTON_100MM_HOLE_DIA/2],
-                              [ARCADE_BUTTON_100MM_NOTCH_DIA/2, MAIN_BUTTON_OFFSET_X-cut_x+MAIN_BUTTON_DIST*3, MAIN_BUTTON_OFFSET_Y-ARCADE_BUTTON_100MM_HOLE_DIA/2]
-                          ]);
-        translate([-cut_x, 0, 0])
-            translate([MAIN_BUTTON_OFFSET_X, MAIN_BUTTON_OFFSET_Y, 0])
-            translate([1.5*MAIN_BUTTON_DIST, 115, 0])
-            %square([510, 64], true);
-            //translate([0, 10-32-6, 0])
-            //linear_extrude(BOX_THICKNESS) {
-            //    footprint_softpot_mount(invert=true, holes=false);
-            //}
+        square([BOX_SIZE.x, BOX_SIZE.y]);
+        translate(BUTTON_OFFSET) {
+            // Buttons
+            panel_button_cuts();
+            // Slider reference
+            translate(SLIDER_OFFSET_REF)
+                %square(SLIDER_SIZE_REF, true);
+        }
     }
 }
 
 // Top side (engraving layer)
 module eng_box_top() {
-    cut_x = (635-OUTER_SIZE[0])/2;
+    cut_x = (635-BOX_SIZE[0])/2;
     translate([15, 15, 0]) corner_screw_holes(15, 15);
-    translate([OUTER_SIZE.x-15, OUTER_SIZE.y-15, 0]) corner_screw_holes(-15, -15);
-    translate([OUTER_SIZE.x-15, 15, 0]) corner_screw_holes(-15, 15);
-    translate([15, OUTER_SIZE.y-15, 0]) corner_screw_holes(15, -15);
+    translate([BOX_SIZE.x-15, BOX_SIZE.y-15, 0]) corner_screw_holes(-15, -15);
+    translate([BOX_SIZE.x-15, 15, 0]) corner_screw_holes(-15, 15);
+    translate([15, BOX_SIZE.y-15, 0]) corner_screw_holes(15, -15);
 
-    translate([-cut_x, 0, 0])
-        translate([MAIN_BUTTON_OFFSET_X, MAIN_BUTTON_OFFSET_Y, 0])
-        translate([1.5*MAIN_BUTTON_DIST, 115, 0]) {
+    translate([BUTTON_OFFSET.x, BUTTON_OFFSET.y, 0])
+        translate([1.5*BUTTON_DIST, 115, 0]) {
             // Slider position reference
             %square([510, 64], true);
             // SoftPot reference
@@ -175,8 +185,8 @@ module eng_box_top() {
 // Left/right side (vector cutting layer)
 module box_side_lr() {
     lasercutoutSquare(thickness=BOX_THICKNESS,
-                      x=OUTER_SIZE.z,
-                      y=OUTER_SIZE.y,
+                      x=BOX_SIZE.z,
+                      y=BOX_SIZE.y,
                       bumpy_finger_joints=[
                           [UP, 1, FINGER_COUNT.z],
                           //[RIGHT, polarity_lr, FINGER_COUNT.y]
@@ -190,20 +200,20 @@ module box_side_lr() {
 // Left/right side (engraving layer)
 module eng_box_side_lr() {
     translate([15, 15, 0]) corner_screw_holes(15, 15);
-    translate([OUTER_SIZE.z-PANEL_THICKNESS-BOX_THICKNESS-15, OUTER_SIZE.y-15, 0]) corner_screw_holes(-15, -15);
-    translate([OUTER_SIZE.z-PANEL_THICKNESS-BOX_THICKNESS-15, 15, 0]) corner_screw_holes(-15, 15);
-    translate([15, OUTER_SIZE.y-15, 0]) corner_screw_holes(15, -15);
+    translate([BOX_SIZE.z-PANEL_THICKNESS-BOX_THICKNESS-15, BOX_SIZE.y-15, 0]) corner_screw_holes(-15, -15);
+    translate([BOX_SIZE.z-PANEL_THICKNESS-BOX_THICKNESS-15, 15, 0]) corner_screw_holes(-15, 15);
+    translate([15, BOX_SIZE.y-15, 0]) corner_screw_holes(15, -15);
 }
 
 // Front side (vector cutting layer)
 module box_side_f() {
     // TODO auxiliary control panel
-    pivot_tab_x = OUTER_SIZE.x/2-BOX_THICKNESS/2;
-    pivot_tab_y = OUTER_SIZE.z-PANEL_THICKNESS-BOX_THICKNESS;
+    pivot_tab_x = BOX_SIZE.x/2-BOX_THICKNESS/2;
+    pivot_tab_y = BOX_SIZE.z-PANEL_THICKNESS-BOX_THICKNESS;
     difference() {
         lasercutoutSquare(thickness=BOX_THICKNESS,
-                          x=OUTER_SIZE.x,
-                          y=OUTER_SIZE.z,
+                          x=BOX_SIZE.x,
+                          y=BOX_SIZE.z,
                           bumpy_finger_joints=[
                               [LEFT, 1, FINGER_COUNT.z],
                           ],
@@ -216,12 +226,12 @@ module box_side_f() {
                               [MID, pivot_tab_x, pivot_tab_y*2/4-BOX_THICKNESS/2],
                               [MID, pivot_tab_x, pivot_tab_y*3/4-BOX_THICKNESS/2],
                           ]);
-        translate([5/8*OUTER_SIZE.x, OUTER_SIZE.z/2, -EPSILON])
+        translate([5/8*BOX_SIZE.x, BOX_SIZE.z/2, -EPSILON])
             linear_extrude(BOX_THICKNESS+2*EPSILON) {
                 footprint_1602();
                 translate([70+3, -1.5]) footprint_re();
             }
-        translate([55/64*OUTER_SIZE.x, OUTER_SIZE.z/2, -EPSILON])
+        translate([55/64*BOX_SIZE.x, BOX_SIZE.z/2, -EPSILON])
             linear_extrude(BOX_THICKNESS+2*EPSILON)
             footprint_control();
     }
@@ -229,26 +239,26 @@ module box_side_f() {
 
 // Front side (engraving layer)
 module eng_box_side_f() {
-    translate([5/8*OUTER_SIZE.x, OUTER_SIZE.z/2, 0]) {
+    translate([5/8*BOX_SIZE.x, BOX_SIZE.z/2, 0]) {
         footprint_1602_eng();
         translate([70+3, -1.5]) footprint_re_eng();
     }
-    translate([OUTER_SIZE.x-15, OUTER_SIZE.z-PANEL_THICKNESS-BOX_THICKNESS-15, 0]) corner_screw_holes(-15, -15);
-    translate([15, OUTER_SIZE.z-PANEL_THICKNESS-BOX_THICKNESS-15, 0]) corner_screw_holes(15, -15);
+    translate([BOX_SIZE.x-15, BOX_SIZE.z-PANEL_THICKNESS-BOX_THICKNESS-15, 0]) corner_screw_holes(-15, -15);
+    translate([15, BOX_SIZE.z-PANEL_THICKNESS-BOX_THICKNESS-15, 0]) corner_screw_holes(15, -15);
     translate([15, 15, 0]) corner_screw_holes(15, 15);
-    translate([OUTER_SIZE.x-15, 15, 0]) corner_screw_holes(-15, 15);
-    translate([55/64*OUTER_SIZE.x, OUTER_SIZE.z/2, 0])
+    translate([BOX_SIZE.x-15, 15, 0]) corner_screw_holes(-15, 15);
+    translate([55/64*BOX_SIZE.x, BOX_SIZE.z/2, 0])
         footprint_control_eng();
 }
 
 // Back side (vector cutting layer)
 module box_side_b() {
-    pivot_tab_x = OUTER_SIZE.x/2-BOX_THICKNESS/2;
-    pivot_tab_y = OUTER_SIZE.z-PANEL_THICKNESS-BOX_THICKNESS;
+    pivot_tab_x = BOX_SIZE.x/2-BOX_THICKNESS/2;
+    pivot_tab_y = BOX_SIZE.z-PANEL_THICKNESS-BOX_THICKNESS;
     difference() {
         lasercutoutSquare(thickness=BOX_THICKNESS,
-                          x=OUTER_SIZE.x,
-                          y=OUTER_SIZE.z,
+                          x=BOX_SIZE.x,
+                          y=BOX_SIZE.z,
                           bumpy_finger_joints=[
                               [RIGHT, 0, FINGER_COUNT.z]
                           ],
@@ -262,7 +272,7 @@ module box_side_b() {
                               [MID, pivot_tab_x, pivot_tab_y*2/4-BOX_THICKNESS/2],
                               [MID, pivot_tab_x, pivot_tab_y*3/4-BOX_THICKNESS/2],
                           ]);
-        translate([OUTER_SIZE.x/4*3, OUTER_SIZE.z/3, -EPSILON]) {
+        translate([BOX_SIZE.x/4*3, BOX_SIZE.z/3, -EPSILON]) {
             linear_extrude(BOX_THICKNESS+2*EPSILON) footprint_back_panel_cutout();
         }
     }
@@ -270,19 +280,19 @@ module box_side_b() {
 
 // Back side (engraving layer)
 module eng_box_side_b() {
-    translate([OUTER_SIZE.x-15, OUTER_SIZE.z-PANEL_THICKNESS-BOX_THICKNESS-15, 0]) corner_screw_holes(-15, -15);
-    translate([15, OUTER_SIZE.z-PANEL_THICKNESS-BOX_THICKNESS-15, 0]) corner_screw_holes(15, -15);
+    translate([BOX_SIZE.x-15, BOX_SIZE.z-PANEL_THICKNESS-BOX_THICKNESS-15, 0]) corner_screw_holes(-15, -15);
+    translate([15, BOX_SIZE.z-PANEL_THICKNESS-BOX_THICKNESS-15, 0]) corner_screw_holes(15, -15);
     translate([15, 15, 0]) corner_screw_holes(15, 15);
-    translate([OUTER_SIZE.x-15, 15, 0]) corner_screw_holes(-15, 15);
-    translate([OUTER_SIZE.x/4*3, OUTER_SIZE.z/3]) {
+    translate([BOX_SIZE.x-15, 15, 0]) corner_screw_holes(-15, 15);
+    translate([BOX_SIZE.x/4*3, BOX_SIZE.z/3]) {
         footprint_back_panel_cutout_eng();
     }
 }
 
 // Pivot (legacy)
 module box_pivot() {
-    x = OUTER_SIZE.z-PANEL_THICKNESS-BOX_THICKNESS;
-    y = OUTER_SIZE.y;
+    x = BOX_SIZE.z-PANEL_THICKNESS-BOX_THICKNESS;
+    y = BOX_SIZE.y;
     lasercutoutSquare(thickness=BOX_THICKNESS,
                       x=x,
                       y=y,
@@ -306,12 +316,24 @@ module box_pivot() {
 
 // Horizontal pivot (between slider and main buttons)
 module box_pivot_h() {
-    
+    // TODO alignment tabs
+    lasercutoutSquare(
+        thickness=BOX_THICKNESS,
+        x=INNER_SIZE.x,
+        y=INNER_SIZE.z
+    );
 }
 
 // Vertical pivot (between main buttons)
 module box_pivot_v_button() {
-    
+    // Rotate by Y axis by -90deg
+    // local X = global Z, local Y = global Y
+    // TODO alignment tabs
+    lasercutoutSquare(
+        thickness=BOX_THICKNESS,
+        x=INNER_SIZE.z,
+        y=SLIDER_BUTTON_GAP_CENTER - BOX_THICKNESS / 2
+    );
 }
 
 // Support platform for capacitive slider module
@@ -333,26 +355,12 @@ module stock_ft_panel() {
 }
 
 // TODO more integrations to the new system
-module rect_ft_panel() {
-    _l = 635;
-    _h = 225;
-
-    // TODO move screw holes to drill layer
-    //module _screw_holes(x, y) {
-    //    translate([x, 0, 0]) circle(d=3.5);
-    //    translate([0, y, 0]) circle(d=3.5);
-    //}
-    //difference() {
-        square([_l, _h]);
-    //    translate([15, 15, 0]) _screw_holes(15, 15);
-    //    translate([_l-15, _h-15, 0]) _screw_holes(-15, -15);
-    //    translate([_l-15, 15, 0]) _screw_holes(-15, 15);
-    //    translate([15, _h-15, 0]) _screw_holes(15, -15);
-    //}
+module rect_ft_panel_fitted() {
+    square([BOX_SIZE.x, BOX_SIZE.y]);
 }
 
-module panel_cuts() {
-    for (i=[0:MAIN_BUTTON_DIST:MAIN_BUTTON_DIST*3]) {
+module panel_button_cuts() {
+    for (i=[0:BUTTON_DIST:BUTTON_DIST*3]) {
         translate([i, 0, 0]) {
             // Button position reference
             //%circle(d=ARCADE_BUTTON_100MM_DIA);
@@ -360,7 +368,7 @@ module panel_cuts() {
         }
         
     }
-    //translate([1.5*MAIN_BUTTON_DIST, 115, 0]) {
+    //translate([1.5*BUTTON_DIST, 115, 0]) {
     //    // Slider position reference
     //    %square([510, 64], true);
         // SoftPot reference
@@ -376,55 +384,51 @@ module softpot_mount() {
 }
 
 module panel_base() {
-    translate([-MAIN_BUTTON_OFFSET_X, -MAIN_BUTTON_OFFSET_Y, 0]) {
+    translate([-BUTTON_OFFSET.x, -BUTTON_OFFSET.y, 0]) {
         // Panel reference
         //%stock_ft_panel();
-        rect_ft_panel();
+        rect_ft_panel_fitted();
     }
 }
 
 module panel() {
-    cut_x = (635-OUTER_SIZE.x)/2;
-    cut_y = (225-OUTER_SIZE.y);
-    translate([-cut_x, 0, 0]) difference() {
-        translate([MAIN_BUTTON_OFFSET_X, MAIN_BUTTON_OFFSET_Y, 0]) difference() {
-            panel_base();
-            panel_cuts();
-            translate([1.5*MAIN_BUTTON_DIST, 115, 0]) translate([0, 10-32-6, 0]) footprint_softpot_mount(holes=false);
-        }
-        square([(635-OUTER_SIZE[0])/2, 225]);
-        translate([635-cut_x, 0, 0]) square([(635-OUTER_SIZE[0])/2, 225]);
-        if (cut_y > 0) {
-            translate([0, 225-cut_y, 0]) square([635, cut_y]);
-        }
+    translate([BUTTON_OFFSET.x, BUTTON_OFFSET.y, 0])
+    difference() {
+        panel_base();
+        panel_button_cuts();
+        // TODO replace this with actual LKP panel footprint
+        translate(SLIDER_OFFSET_REF)
+            square(SLIDER_SIZE_REF, true);
     }
 }
 
 module eng_panel() {
-    cut_x = (635-OUTER_SIZE[0])/2;
+    cut_x = (635-BOX_SIZE[0])/2;
 
     translate([-cut_x, 0, 0]) {
-        translate([MAIN_BUTTON_OFFSET_X, MAIN_BUTTON_OFFSET_Y, 0]) translate([1.5*MAIN_BUTTON_DIST, 115, 0]) {
+        translate([BUTTON_OFFSET_REF.x, BUTTON_OFFSET_REF.y, 0]) translate([1.5*BUTTON_DIST, 115, 0]) {
             // Slider position reference
-            %square([510, 64], true);
+            //%square([510, 64], true);
             // SoftPot reference
-            translate([0, 10-32-6, 0]) {
-                %square([500, 20], true);
-                footprint_softpot_mount(invert=true, tail_cut=false);
-            }
+            //translate([0, 10-32-6, 0]) {
+                //%square([500, 20], true);
+                // TODO replace with LKP
+                //footprint_softpot_mount(invert=true, tail_cut=false);
+            //}
         }
     }
+    // TODO re-layout
     translate([15, 15, 0]) corner_screw_holes(15, 15);
-    translate([OUTER_SIZE.x-15, OUTER_SIZE.y-15, 0]) corner_screw_holes(-15, -15);
-    translate([OUTER_SIZE.x-15, 15, 0]) corner_screw_holes(-15, 15);
-    translate([15, OUTER_SIZE.y-15, 0]) corner_screw_holes(15, -15);
+    translate([BOX_SIZE.x-15, BOX_SIZE.y-15, 0]) corner_screw_holes(-15, -15);
+    translate([BOX_SIZE.x-15, 15, 0]) corner_screw_holes(-15, 15);
+    translate([15, BOX_SIZE.y-15, 0]) corner_screw_holes(15, -15);
 }
 
 module inv_panel() {
-    cut_x = (635-OUTER_SIZE[0])/2;
+    cut_x = (635-BOX_SIZE[0])/2;
     translate([-cut_x, 0, 0])
-        translate([MAIN_BUTTON_OFFSET_X, MAIN_BUTTON_OFFSET_Y, 0])
-        translate([1.5*MAIN_BUTTON_DIST, 115, 0])
+        translate([BUTTON_OFFSET_REF.x, BUTTON_OFFSET_REF.y, 0])
+        translate([1.5*BUTTON_DIST, 115, 0])
         translate([0, 10-32-6, 0]) {
             square([520-1, 40-1], center=true);
         }
@@ -443,14 +447,14 @@ module box1_2d() {
     %square(SHEET_BOX);
     if (ENGRAVE) {
         eng_box_top();
-        translate([BOX_THICKNESS, BOX_THICKNESS*2+OUTER_SIZE.y])
+        translate([BOX_THICKNESS, BOX_THICKNESS*2+BOX_SIZE.y])
             eng_box_side_f();
     } else {
         projection() {
             box_top();
-            translate([BOX_THICKNESS, BOX_THICKNESS*2+OUTER_SIZE.y])
+            translate([BOX_THICKNESS, BOX_THICKNESS*2+BOX_SIZE.y])
                 box_side_f();
-            //translate([BOX_THICKNESS, BOX_THICKNESS*2+OUTER_SIZE.y, 0]) box_bottom();
+            //translate([BOX_THICKNESS, BOX_THICKNESS*2+BOX_SIZE.y, 0]) box_bottom();
         }
     }
 }
@@ -461,12 +465,12 @@ module box2_2d() {
         // TODO
         translate([BOX_THICKNESS, BOX_THICKNESS])
             eng_box_bottom();
-        translate([BOX_THICKNESS, BOX_THICKNESS*3+OUTER_SIZE.y])
+        translate([BOX_THICKNESS, BOX_THICKNESS*3+BOX_SIZE.y])
             eng_box_side_b();
     } else {
         projection() {
             translate([BOX_THICKNESS, BOX_THICKNESS]) box_bottom();
-            translate([BOX_THICKNESS, BOX_THICKNESS*3+OUTER_SIZE.y])
+            translate([BOX_THICKNESS, BOX_THICKNESS*3+BOX_SIZE.y])
                 box_side_b();
         }
     }
@@ -475,19 +479,19 @@ module box2_2d() {
 module box3_2d() {
     %square(SHEET_BOX);
     if (ENGRAVE) {
-        translate([BOX_THICKNESS*2+OUTER_SIZE.y, 0])
+        translate([BOX_THICKNESS*2+BOX_SIZE.y, 0])
         rotate([0, 0, 90]) {
             translate([BOX_THICKNESS, BOX_THICKNESS]) eng_box_side_lr();
-            translate([BOX_THICKNESS*3+OUTER_SIZE.z, BOX_THICKNESS])
+            translate([BOX_THICKNESS*3+BOX_SIZE.z, BOX_THICKNESS])
                 eng_box_side_lr();
         }
     } else {
-        translate([BOX_THICKNESS*2+OUTER_SIZE.y, 0])
+        translate([BOX_THICKNESS*2+BOX_SIZE.y, 0])
         rotate([0, 0, 90]) {
             translate([BOX_THICKNESS, BOX_THICKNESS]) projection() box_side_lr();
-            translate([BOX_THICKNESS*3+OUTER_SIZE.z, BOX_THICKNESS]) {
+            translate([BOX_THICKNESS*3+BOX_SIZE.z, BOX_THICKNESS]) {
                 projection() box_side_lr();
-                translate([BOX_THICKNESS*2+OUTER_SIZE.z, 0])
+                translate([BOX_THICKNESS*2+BOX_SIZE.z, 0])
                     projection() box_pivot();
             }
         }
@@ -504,23 +508,28 @@ if (_PREVIEW) {
     }
 
     if (PREVIEW_PIVOT) {
-        color("Red", 0.5)
-            translate([OUTER_SIZE.x/2+BOX_THICKNESS/2,0,BOX_THICKNESS])
-            rotate([0, -90, 0])
-                box_pivot();
+        color("Red", 0.5) {
+            //translate([BOX_SIZE.x/2+BOX_THICKNESS/2,0,BOX_THICKNESS])
+            //rotate([0, -90, 0])
+            //    box_pivot();
+            // original pos is outside edge
+            translate([0, as_lcb_center(SLIDER_BUTTON_GAP_CENTER+BOX_THICKNESS), BOX_THICKNESS])
+            rotate([90, 0, 0])
+                box_pivot_h();
+        }
     }
 
     if (PREVIEW_MOUNTING) {
-        translate([0, 0, OUTER_SIZE.z-PANEL_THICKNESS])
+        translate([0, 0, BOX_SIZE.z-PANEL_THICKNESS])
             rotate([-90, 0, 0])
             mounting_bracket();
-        translate([0, OUTER_SIZE.y, OUTER_SIZE.z-PANEL_THICKNESS])
+        translate([0, BOX_SIZE.y, BOX_SIZE.z-PANEL_THICKNESS])
             rotate([-90, 0, -90])
             mounting_bracket();
-        translate([OUTER_SIZE.x, 0, OUTER_SIZE.z-PANEL_THICKNESS])
+        translate([BOX_SIZE.x, 0, BOX_SIZE.z-PANEL_THICKNESS])
             rotate([-90, 0, -270])
             mounting_bracket();
-        translate([OUTER_SIZE.x, OUTER_SIZE.y, OUTER_SIZE.z-PANEL_THICKNESS])
+        translate([BOX_SIZE.x, BOX_SIZE.y, BOX_SIZE.z-PANEL_THICKNESS])
             rotate([-90, 0, -180])
             mounting_bracket();
     }
@@ -537,7 +546,7 @@ if (_PREVIEW) {
 
     if (PREVIEW_RIGHT_WALL) {
         color("Cyan",0.5)
-            translate([OUTER_SIZE.x,OUTER_SIZE.y,BOX_THICKNESS])
+            translate([BOX_SIZE.x,BOX_SIZE.y,BOX_THICKNESS])
             rotate([0, -90, 180])
             difference() {
                 box_side_lr();
@@ -557,7 +566,7 @@ if (_PREVIEW) {
 
     if (PREVIEW_BACK_WALL) {
         color("Purple", 0.5)
-            translate([0,OUTER_SIZE.y+BOX_THICKNESS,BOX_THICKNESS])
+            translate([0,BOX_SIZE.y+BOX_THICKNESS,BOX_THICKNESS])
             rotate([90, 0, 0])
             difference() {
                 box_side_b();
@@ -567,16 +576,16 @@ if (_PREVIEW) {
 
     if (PREVIEW_TOP_COVER) {
         color("Yellow", 0.5)
-            translate([0, 0, OUTER_SIZE.z-PANEL_THICKNESS])
+            translate([0, 0, BOX_SIZE.z-PANEL_THICKNESS])
             difference() {
-                box_top();
+                linear_extrude(BOX_THICKNESS) box_top();
                 linear_extrude(BOX_THICKNESS) eng_box_top();
             }
     }
 
     if (PREVIEW_TOP_PANEL) {
         color("Grey", 0.5)
-            translate([0, 0, OUTER_SIZE.z+BOX_THICKNESS-PANEL_THICKNESS])
+            translate([0, 0, BOX_SIZE.z+BOX_THICKNESS-PANEL_THICKNESS])
             linear_extrude(PANEL_THICKNESS) {
                 difference() {
                     panel();
@@ -584,7 +593,8 @@ if (_PREVIEW) {
                     inv_panel();
                 }
                 difference() {
-                    inv_panel();
+                    // broken, disabled for now
+                    //inv_panel();
                     panel();
                     eng_panel();
                 }

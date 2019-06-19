@@ -3,8 +3,8 @@
 include <imperial.scad>
 
 ARCADE_BUTTON_100MM_DIA = 100;
-ARCADE_BUTTON_100MM_HOLE_DIA = 90;
-ARCADE_BUTTON_100MM_NOTCH_DIA = 7;
+ARCADE_BUTTON_100MM_HOLE_DIA = 88;
+ARCADE_BUTTON_100MM_NOTCH_DIA = 6.5;
 
 module footprint_arcade_button_100mm() {
     union() {
@@ -25,6 +25,9 @@ module footprint_arcade_button_100mm() {
 //    square([80, 36], true);
 //}
 
+// Drill: invert=true, tail_cut=false
+// Tail cut (difference): invert=true, holes=false
+// TODO account for tail when positioning tail cut.
 module footprint_softpot_mount(softpot_length=500, softpot_width=20, padding=20, invert=false, holes=true, tail_cut=true) {
     module _screw_holes() {
         offset_x = half_l + screw_hole_offset_from_pot;
