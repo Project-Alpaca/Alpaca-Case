@@ -105,6 +105,26 @@ EPSILON = .01;
 // Accounting for the thickness for lasercut boards
 function as_lcb_center(pos) = pos - BOX_THICKNESS/2;
 
+module extrude_box() {
+    linear_extrude(BOX_THICKNESS) children();
+}
+
+module extrude_panel() {
+    linear_extrude(PANEL_THICKNESS) children();
+}
+
+module extrude_box_cutout() {
+    translate([0, 0, -EPSILON])
+    linear_extrude(BOX_THICKNESS+2*EPSILON)
+        children();
+}
+
+module extrude_panel_cutout() {
+    translate([0, 0, -EPSILON])
+    linear_extrude(PANEL_THICKNESS+2*EPSILON)
+        children();
+}
+
 module corner_screw_holes(x, y) {
     //translate([0, 0, 0]) circle(d=3.2);
     translate([x, 0, 0]) circle(d=3.2);
@@ -226,14 +246,14 @@ module box_side_f() {
                               [MID, pivot_tab_x, pivot_tab_y*2/4-BOX_THICKNESS/2],
                               [MID, pivot_tab_x, pivot_tab_y*3/4-BOX_THICKNESS/2],
                           ]);
-        translate([5/8*BOX_SIZE.x, BOX_SIZE.z/2, -EPSILON])
-            linear_extrude(BOX_THICKNESS+2*EPSILON) {
+        translate([5/8*BOX_SIZE.x, BOX_SIZE.z/2, 0])
+            extrude_box_cutout() {
                 footprint_1602();
                 translate([70+3, -1.5]) footprint_re();
             }
-        translate([55/64*BOX_SIZE.x, BOX_SIZE.z/2, -EPSILON])
-            linear_extrude(BOX_THICKNESS+2*EPSILON)
-            footprint_control();
+        translate([55/64*BOX_SIZE.x, BOX_SIZE.z/2, 0])
+            extrude_box_cutout()
+                footprint_control();
     }
 }
 
@@ -272,8 +292,8 @@ module box_side_b() {
                               [MID, pivot_tab_x, pivot_tab_y*2/4-BOX_THICKNESS/2],
                               [MID, pivot_tab_x, pivot_tab_y*3/4-BOX_THICKNESS/2],
                           ]);
-        translate([BOX_SIZE.x/4*3, BOX_SIZE.z/3, -EPSILON]) {
-            linear_extrude(BOX_THICKNESS+2*EPSILON) footprint_back_panel_cutout();
+        translate([BOX_SIZE.x/4*3, BOX_SIZE.z/3, 0]) {
+            extrude_box_cutout() footprint_back_panel_cutout();
         }
     }
 }
@@ -503,7 +523,7 @@ if (_PREVIEW) {
     if (PREVIEW_BOTTOM) {
         color("Green",0.5) difference() {
             box_bottom();
-            translate([0, 0, -EPSILON]) linear_extrude(BOX_THICKNESS+2*EPSILON) eng_box_bottom();
+            extrude_box_cutout() eng_box_bottom();
         }
     }
 
@@ -540,7 +560,7 @@ if (_PREVIEW) {
             rotate([0, -90, 0])
             difference() {
                 box_side_lr();
-                translate([0, 0, -EPSILON]) linear_extrude(BOX_THICKNESS+2*EPSILON) eng_box_side_lr();
+                extrude_box_cutout() eng_box_side_lr();
             }
     }
 
@@ -550,7 +570,7 @@ if (_PREVIEW) {
             rotate([0, -90, 180])
             difference() {
                 box_side_lr();
-                translate([0, 0, -EPSILON]) linear_extrude(BOX_THICKNESS+2*EPSILON) eng_box_side_lr();
+                extrude_box_cutout() eng_box_side_lr();
             }
     }
 
@@ -560,7 +580,7 @@ if (_PREVIEW) {
             rotate([90, 0, 0])
             difference() {
                 box_side_f();
-                translate([0, 0, -EPSILON]) linear_extrude(BOX_THICKNESS+2*EPSILON) eng_box_side_f();
+                extrude_box_cutout() eng_box_side_f();
             }
     }
 
@@ -570,7 +590,7 @@ if (_PREVIEW) {
             rotate([90, 0, 0])
             difference() {
                 box_side_b();
-                translate([0, 0, -EPSILON]) linear_extrude(BOX_THICKNESS+2*EPSILON) eng_box_side_b();
+                extrude_box_cutout() eng_box_side_b();
             }
     }
 
@@ -578,15 +598,15 @@ if (_PREVIEW) {
         color("Yellow", 0.5)
             translate([0, 0, BOX_SIZE.z-PANEL_THICKNESS])
             difference() {
-                linear_extrude(BOX_THICKNESS) box_top();
-                linear_extrude(BOX_THICKNESS) eng_box_top();
+                extrude_box() box_top();
+                extrude_box() eng_box_top();
             }
     }
 
     if (PREVIEW_TOP_PANEL) {
         color("Grey", 0.5)
             translate([0, 0, BOX_SIZE.z+BOX_THICKNESS-PANEL_THICKNESS])
-            linear_extrude(PANEL_THICKNESS) {
+            extrude_panel() {
                 difference() {
                     panel();
                     eng_panel();
