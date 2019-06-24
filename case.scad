@@ -105,6 +105,9 @@ EPSILON = .01;
 // Accounting for the thickness for lasercut boards
 function as_lcb_center(pos) = pos - BOX_THICKNESS/2;
 
+// Button gap center
+function button_gap_center(pos) = BUTTON_DIST * (0.5+pos);
+
 module extrude_box() {
     linear_extrude(BOX_THICKNESS) children();
 }
@@ -123,6 +126,10 @@ module extrude_panel_cutout() {
     translate([0, 0, -EPSILON])
     linear_extrude(PANEL_THICKNESS+2*EPSILON)
         children();
+}
+
+module from_button_origin() {
+    translate(BUTTON_OFFSET) children();
 }
 
 module corner_screw_holes(x, y) {
@@ -172,7 +179,7 @@ module eng_box_bottom() {
 module box_top() {
     difference() {
         square([BOX_SIZE.x, BOX_SIZE.y]);
-        translate(BUTTON_OFFSET) {
+        from_button_origin() {
             // Buttons
             panel_button_cuts();
             // Slider reference
@@ -190,7 +197,7 @@ module eng_box_top() {
     translate([BOX_SIZE.x-15, 15, 0]) corner_screw_holes(-15, 15);
     translate([15, BOX_SIZE.y-15, 0]) corner_screw_holes(15, -15);
 
-    translate([BUTTON_OFFSET.x, BUTTON_OFFSET.y, 0])
+    from_button_origin()
         translate([1.5*BUTTON_DIST, 115, 0]) {
             // Slider position reference
             %square([510, 64], true);
@@ -536,6 +543,11 @@ if (_PREVIEW) {
             translate([0, as_lcb_center(SLIDER_BUTTON_GAP_CENTER+BOX_THICKNESS), BOX_THICKNESS])
             rotate([90, 0, 0])
                 box_pivot_h();
+            for (i=[0:2]) {
+                translate([BUTTON_OFFSET.x+as_lcb_center(button_gap_center(i)+BOX_THICKNESS), 0, BOX_THICKNESS])
+                rotate([0, -90, 0])
+                    box_pivot_v_button();
+            }
         }
     }
 
