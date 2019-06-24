@@ -100,7 +100,7 @@ BOTTOM = 6;
 MOUNTING = 7;
 PIVOT = 8;
 
-EPSILON = .01;
+EPSILON = .1;
 
 // Accounting for the thickness for lasercut boards
 function as_lcb_center(pos) = pos - BOX_THICKNESS/2;
