@@ -1,3 +1,6 @@
 [submodule "ext/lasercut"]
 	path = ext/lasercut
 	url = https://github.com/bmsleight/lasercut.git
+[submodule "ext/laserscad"]
+	path = ext/laserscad
+	url = https://github.com/mbugert/laserscad.git

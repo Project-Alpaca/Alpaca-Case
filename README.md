@@ -1,6 +1,6 @@
-# ALAC4P-Case
+# Alpaca-Case
 
-Laser cut case for ALAC4P.
+Laser cut case for Alpaca.
 
 ## Usage
 
