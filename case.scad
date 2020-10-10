@@ -1,5 +1,6 @@
 include <ext/lasercut/lasercut.scad>
 include <ext/laserscad/dist/laserscad.scad>
+include <ext/LKP-Assy/lkp-assy-ex.scad>
 include <footprints.scad>
 include <imperial.scad>
 use <models.scad>
@@ -40,6 +41,8 @@ PREVIEW_BOTTOM = true;
 PREVIEW_MOUNTING = true;
 // Pivots
 PREVIEW_PIVOT = true;
+// LKP
+PREVIEW_LKP = true;
 
 /* [Hidden] */
 
@@ -50,7 +53,7 @@ BOX_THICKNESS = in(1/4);
 PANEL_THICKNESS = mil(80);
 
 // Size of the inner box (without accounting controller panel)
-BOX_SIZE = [in(23), 225, 95];
+BOX_SIZE = [580, 225, 95];
 PANEL_SIZE_REF = [635, 225];
 
 // Size of the outer edge
@@ -83,23 +86,10 @@ SLIDER_OFFSET_REF = [1.5*BUTTON_DIST, SLIDER_BOTTOM_Y + SLIDER_SIZE_REF.y/2];
 // Button sits at zero. Therefore teh gap between slider and button (hole) would be (the slider bottom offset - the button radius with notch)
 SLIDER_BUTTON_GAP_CENTER = SLIDER_BOTTOM_Y - ((SLIDER_BOTTOM_Y - BUTTON_R_WITH_NOTCH) / 2) + BUTTON_OFFSET.y;
 
-// Controller model (SPM = SoftPot, LKP = Capacitive)
-CONTROLLER_MODEL = "SPM";
-
 //SOFTPOT_WIDTH = 20;
 //SOFTPOT_DEADZONE_WIDTH = 6;
 
 // Internal use only. Do not change.
-
-FRONT_WALL = 0;
-BACK_WALL = 1;
-LEFT_WALL = 2;
-RIGHT_WALL = 3;
-TOP_COVER = 4;
-TOP_PANEL = 5;
-BOTTOM = 6;
-MOUNTING = 7;
-PIVOT = 8;
 
 EPSILON = .1;
 
@@ -199,7 +189,7 @@ module box_top() {
             panel_button_cuts();
             // Slider reference
             translate(SLIDER_OFFSET_REF)
-                %square(SLIDER_SIZE_REF, true);
+                lkp_assy_sensor_center() lkp_assy_profile();
         }
     }
 }
@@ -211,17 +201,6 @@ module eng_box_top() {
     translate([_box_top_idim.x-15, _box_top_idim.y-15, 0]) corner_screw_holes(-15, -15);
     translate([_box_top_idim.x-15, 15, 0]) corner_screw_holes(-15, 15);
     translate([15, _box_top_idim.y-15, 0]) corner_screw_holes(15, -15);
-
-    from_button_origin()
-        translate([1.5*BUTTON_DIST, 115, 0]) {
-            // Slider position reference
-            %square([510, 64], true);
-            // SoftPot reference
-            translate([0, 10-32-6, 0]) {
-                //%square([500, 20], true);
-                footprint_softpot_mount(invert=true, tail_cut=false);
-            }
-        }
 }
 
 // Left/right side (vector cutting layer)
@@ -409,13 +388,20 @@ module panel_base() {
 }
 
 module panel() {
-    translate([BUTTON_OFFSET.x, BUTTON_OFFSET.y, 0])
-    difference() {
-        panel_base();
-        panel_button_cuts();
-        // TODO replace this with actual LKP panel footprint
-        translate(SLIDER_OFFSET_REF)
-            square(SLIDER_SIZE_REF, true);
+    from_button_origin() {
+        difference() {
+            panel_base();
+            panel_button_cuts();
+            // LKP cutout
+            translate(SLIDER_OFFSET_REF) {
+                difference() {
+                    lkp_assy_sensor_center()
+                        lkp_assy_profile();
+                    lkp_overlay_sensor_center()
+                        lkp_overlay_profile();
+                }
+            }
+        }
     }
 }
 
@@ -614,6 +600,19 @@ if (_PREVIEW) {
                     eng_panel();
                 }
             }
+    }
+    if (PREVIEW_LKP) {
+        color("Lime", 0.5)
+        // Button-base coordinate in 3D (panel z level)
+        translate([BUTTON_OFFSET.x,
+                   BUTTON_OFFSET.y,
+                   BOX_SIZE.z+BOX_THICKNESS-PANEL_THICKNESS])
+        // Slider 2D offset and LKP-Assy sink z offset
+            translate([SLIDER_OFFSET_REF.x,
+                       SLIDER_OFFSET_REF.y,
+                       LKP_EXPORT_ASSY_ZOFFSET])
+        // Center the sensing area
+            lkp_demo_assy_centered();
     }
 
 } else {
