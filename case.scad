@@ -1,8 +1,8 @@
 include <ext/lasercut/lasercut.scad>
 include <ext/laserscad/dist/laserscad.scad>
-include <ext/LKP-Assy/lkp-assy-ex.scad>
 include <footprints.scad>
-include <imperial.scad>
+use <ext/LKP-Assy/lkp-assy-ex.scad>
+use <imperial.scad>
 use <models.scad>
 
 /* [Viewer Options] */
@@ -607,11 +607,10 @@ if (_PREVIEW) {
         translate([BUTTON_OFFSET.x,
                    BUTTON_OFFSET.y,
                    BOX_SIZE.z+BOX_THICKNESS-PANEL_THICKNESS])
-        // Slider 2D offset and LKP-Assy sink z offset
-            translate([SLIDER_OFFSET_REF.x,
-                       SLIDER_OFFSET_REF.y,
-                       LKP_EXPORT_ASSY_ZOFFSET])
-        // Center the sensing area
+        // Slider 2D offset
+            translate(SLIDER_OFFSET_REF)
+        // LKP-Assy sink z offset
+            lkp_assy_zposition()
             lkp_demo_assy_centered();
     }
 
