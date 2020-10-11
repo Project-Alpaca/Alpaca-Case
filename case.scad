@@ -41,6 +41,8 @@ PREVIEW_BOTTOM = true;
 PREVIEW_MOUNTING = true;
 // Pivots
 PREVIEW_PIVOT = true;
+// LKP platform
+PREVIEW_LKP_PLATFORM = true;
 // LKP
 PREVIEW_LKP = true;
 
@@ -338,7 +340,7 @@ module box_lkp_platform() {
     lasercutoutSquare(
         thickness=BOX_THICKNESS,
         x=INNER_SIZE.x,
-        y=INNER_SIZE.y - BUTTON_OFFSET_BACKOFF + BOX_THICKNESS / 2
+        y=INNER_SIZE.y - BUTTON_OFFSET_BACKOFF - BOX_THICKNESS / 2
     );
 }
 
@@ -605,6 +607,14 @@ if (_PREVIEW) {
                     eng_panel();
                 }
             }
+    }
+    if (PREVIEW_LKP_PLATFORM) {
+        color("Blue", 0.5)
+        translate([0,
+                   BUTTON_OFFSET_BACKOFF + BOX_THICKNESS / 2,
+                   BOX_SIZE.z-PANEL_THICKNESS])
+            translate([0, 0, lkp_get_assy_zoffset()])
+            box_lkp_platform();
     }
     if (PREVIEW_LKP) {
         color("Lime", 0.5)
