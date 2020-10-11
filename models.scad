@@ -1,10 +1,15 @@
 include <footprints.scad>
 
+// Item selection
+ITEM = "none"; // ["none", "printed_io_shield", "mounting_bracket", "corner_support", "pivot_holder"]
+
+// Thickness of the mounting bracket
 MOUNTING_WALL_THICKNESS = 8;
 
-ITEM = undef;
+// Thickness of the box
+BOX_THICKNESS = 6.35;
 
-module printed_panel() {
+module printed_io_shield() {
     $fn=25;
     linear_extrude(2) difference() {
         footprint_back_panel();
@@ -67,11 +72,23 @@ module mounting_bracket() {
     }
 }
 
-if (ITEM == "printed_panel") {
-    printed_panel();
+module corner_support() {
+    
+}
+
+module pivot_holder() {
+    
+}
+
+if (ITEM == "printed_io_shield") {
+    printed_io_shield();
 } else if (ITEM == "mounting_bracket") {
     mounting_bracket();
+} else if (ITEM == "corner_support") {
+    corner_support();
+} else if (ITEM == "pivot_holder") {
+    pivot_holder();
 } else {
     echo("Usage: openscad -DITEM=model -o output.stl models.scad");
-    echo("Accepted model: printed_panel, mounting_bracket");
+    echo("Accepted model: printed_io_shield, mounting_bracket, corner_support, pivot_holder");
 }

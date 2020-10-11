@@ -167,11 +167,11 @@ module box_bottom() {
                           [RIGHT, _box_bottom_idim.x, BOX_THICKNESS/2+_box_bottom_idim.y],
                       ],
                       simple_tab_holes=[
-                          [MID, pivot_tab_x, as_lcb_center(pivot_tab_y/6)],
-                          [MID, pivot_tab_x, as_lcb_center(pivot_tab_y*2/6)],
-                          [MID, pivot_tab_x, as_lcb_center(pivot_tab_y*3/6)],
-                          [MID, pivot_tab_x, as_lcb_center(pivot_tab_y*4/6)],
-                          [MID, pivot_tab_x, as_lcb_center(pivot_tab_y*5/6)]
+                          //[MID, pivot_tab_x, as_lcb_center(pivot_tab_y/6)],
+                          //[MID, pivot_tab_x, as_lcb_center(pivot_tab_y*2/6)],
+                          //[MID, pivot_tab_x, as_lcb_center(pivot_tab_y*3/6)],
+                          //[MID, pivot_tab_x, as_lcb_center(pivot_tab_y*4/6)],
+                          //[MID, pivot_tab_x, as_lcb_center(pivot_tab_y*5/6)]
                       ]);
 }
 
@@ -246,9 +246,9 @@ module box_side_f() {
                               [RIGHT, 1, FINGER_COUNT.z]
                           ],
                           simple_tab_holes=[
-                              [MID, pivot_tab_x, pivot_tab_y/4-BOX_THICKNESS/2],
-                              [MID, pivot_tab_x, pivot_tab_y*2/4-BOX_THICKNESS/2],
-                              [MID, pivot_tab_x, pivot_tab_y*3/4-BOX_THICKNESS/2],
+                              //[MID, pivot_tab_x, pivot_tab_y/4-BOX_THICKNESS/2],
+                              //[MID, pivot_tab_x, pivot_tab_y*2/4-BOX_THICKNESS/2],
+                              //[MID, pivot_tab_x, pivot_tab_y*3/4-BOX_THICKNESS/2],
                           ]);
         translate([5/8*_box_side_f_idim.x, _box_side_f_idim.y/2, 0])
             extrude_box_cutout() {
@@ -292,9 +292,9 @@ module box_side_b() {
                               
                           ],
                           simple_tab_holes=[
-                              [MID, pivot_tab_x, pivot_tab_y/4-BOX_THICKNESS/2],
-                              [MID, pivot_tab_x, pivot_tab_y*2/4-BOX_THICKNESS/2],
-                              [MID, pivot_tab_x, pivot_tab_y*3/4-BOX_THICKNESS/2],
+                              //[MID, pivot_tab_x, pivot_tab_y/4-BOX_THICKNESS/2],
+                              //[MID, pivot_tab_x, pivot_tab_y*2/4-BOX_THICKNESS/2],
+                              //[MID, pivot_tab_x, pivot_tab_y*3/4-BOX_THICKNESS/2],
                           ]);
         translate([_box_side_b_idim.x/4*3, _box_side_b_idim.y/3, 0]) {
             extrude_box_cutout() footprint_back_panel_cutout();
@@ -327,7 +327,7 @@ module box_pivot_h() {
 module box_pivot_v_button() {
     // Rotate by Y axis by -90deg
     // local X = global Z, local Y = global Y
-    // TODO alignment tabs
+    // TODO alignment tabs on bottom and h pivot
     lasercutoutSquare(
         thickness=BOX_THICKNESS,
         x=INNER_SIZE.z,
@@ -513,6 +513,7 @@ module boxes_lscad() {
 }
 
 if (_PREVIEW) {
+    // Orders matter here in order to maintain the transparent illusions
     //echo("WARNING: This is just a preview. Set PREVIEW=false to get laser cuttable shapes.");
     if (PREVIEW_BOTTOM) {
         color("Green",0.5) difference() {
@@ -521,6 +522,14 @@ if (_PREVIEW) {
         }
     }
 
+    if (PREVIEW_LKP_PLATFORM) {
+        color("Blue", 0.5)
+        translate([0,
+                   BUTTON_OFFSET_BACKOFF + BOX_THICKNESS / 2,
+                   BOX_SIZE.z-PANEL_THICKNESS])
+            translate([0, 0, lkp_get_assy_zoffset()])
+            box_lkp_platform();
+    }
     if (PREVIEW_PIVOT) {
         color("Red", 0.5) {
             //translate([BOX_SIZE.x/2+BOX_THICKNESS/2,0,BOX_THICKNESS])
@@ -581,7 +590,6 @@ if (_PREVIEW) {
                 extrude_box_cutout() eng_box_side_b();
             }
     }
-
     if (PREVIEW_TOP_COVER) {
         color("Yellow", 0.5)
             translate([0, 0, BOX_SIZE.z-PANEL_THICKNESS])
@@ -607,14 +615,6 @@ if (_PREVIEW) {
                     eng_panel();
                 }
             }
-    }
-    if (PREVIEW_LKP_PLATFORM) {
-        color("Blue", 0.5)
-        translate([0,
-                   BUTTON_OFFSET_BACKOFF + BOX_THICKNESS / 2,
-                   BOX_SIZE.z-PANEL_THICKNESS])
-            translate([0, 0, lkp_get_assy_zoffset()])
-            box_lkp_platform();
     }
     if (PREVIEW_LKP) {
         color("Lime", 0.5)

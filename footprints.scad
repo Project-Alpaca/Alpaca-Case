@@ -2,6 +2,9 @@
 
 include <imperial.scad>
 
+/* [Hidden] */
+
+// Constants. Do not edit.
 ARCADE_BUTTON_100MM_DIA = 100;
 ARCADE_BUTTON_100MM_HOLE_DIA = 88;
 ARCADE_BUTTON_100MM_NOTCH_DIA = 6.5;
