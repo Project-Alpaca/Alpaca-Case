@@ -85,6 +85,7 @@ SLIDER_BOTTOM_Y = 75;
 SLIDER_OFFSET_REF = [1.5*BUTTON_DIST, SLIDER_BOTTOM_Y + SLIDER_SIZE_REF.y/2];
 // Button sits at zero. Therefore teh gap between slider and button (hole) would be (the slider bottom offset - the button radius with notch)
 SLIDER_BUTTON_GAP_CENTER = SLIDER_BOTTOM_Y - ((SLIDER_BOTTOM_Y - BUTTON_R_WITH_NOTCH) / 2) + BUTTON_OFFSET.y;
+BUTTON_OFFSET_BACKOFF = BUTTON_R_WITH_NOTCH + BUTTON_OFFSET.y + BOX_THICKNESS / 2 + 3;
 
 //SOFTPOT_WIDTH = 20;
 //SOFTPOT_DEADZONE_WIDTH = 6;
@@ -328,13 +329,17 @@ module box_pivot_v_button() {
     lasercutoutSquare(
         thickness=BOX_THICKNESS,
         x=INNER_SIZE.z,
-        y=SLIDER_BUTTON_GAP_CENTER - BOX_THICKNESS / 2
+        y=BUTTON_OFFSET_BACKOFF - BOX_THICKNESS / 2
     );
 }
 
 // Support platform for capacitive slider module
 module box_lkp_platform() {
-    
+    lasercutoutSquare(
+        thickness=BOX_THICKNESS,
+        x=INNER_SIZE.x,
+        y=INNER_SIZE.y - BUTTON_OFFSET_BACKOFF + BOX_THICKNESS / 2
+    );
 }
 
 // Stock panel shape. Build using this may be more challenging than using the
@@ -520,7 +525,7 @@ if (_PREVIEW) {
             //rotate([0, -90, 0])
             //    box_pivot();
             // original pos is outside edge
-            translate([0, as_lcb_center(SLIDER_BUTTON_GAP_CENTER+BOX_THICKNESS), BOX_THICKNESS])
+            translate([0, as_lcb_center(BUTTON_OFFSET_BACKOFF+BOX_THICKNESS), BOX_THICKNESS])
             rotate([90, 0, 0])
                 box_pivot_h();
             for (i=[-1:3]) {
