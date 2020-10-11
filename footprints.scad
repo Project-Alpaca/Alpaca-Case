@@ -5,9 +5,11 @@ include <imperial.scad>
 /* [Hidden] */
 
 // Constants. Do not edit.
+
+// https://www.adafruit.com/product/1185#technical-details
 ARCADE_BUTTON_100MM_DIA = 100;
-ARCADE_BUTTON_100MM_HOLE_DIA = 88;
-ARCADE_BUTTON_100MM_NOTCH_DIA = 6.5;
+ARCADE_BUTTON_100MM_HOLE_DIA = 88; // on drawing: 87.8
+ARCADE_BUTTON_100MM_NOTCH_DIA = 6.2; // on drawing: 6.0
 
 module footprint_arcade_button_100mm() {
     union() {
