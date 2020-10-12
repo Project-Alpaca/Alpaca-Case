@@ -9,6 +9,7 @@ use <models.scad>
 // Set this to true to get a 3D preview of the assembled controller
 PREVIEW_3D = true;
 _PREVIEW = $preview == undef || $preview == true ? PREVIEW_3D : false;
+$fn = _PREVIEW ? undef : 48;
 
 // Set this to true when PREVIEW_3D=false generates layer for laser engraving (mainly for position of screw holes so they can be drilled later)
 ENGRAVE = false;
@@ -162,7 +163,7 @@ module box_bottom() {
                       // Extended finger joints
                       simple_tabs=[
                           [UP, -BOX_THICKNESS/2, _box_bottom_idim.y],
-                          [DOWN, _box_bottom_idim.y+BOX_THICKNESS/2, 0],
+                          [DOWN, _box_bottom_idim.x+BOX_THICKNESS/2, 0],
                           [LEFT, 0, -BOX_THICKNESS/2],
                           [RIGHT, _box_bottom_idim.x, BOX_THICKNESS/2+_box_bottom_idim.y],
                       ],
@@ -178,7 +179,7 @@ module box_bottom() {
 // Bottom side (engraving layer)
 module eng_box_bottom() {
     translate([15, 15, 0]) corner_screw_holes(15, 15);
-    translate([_box_bottom_idim.y-15, _box_bottom_idim.y-15, 0]) corner_screw_holes(-15, -15);
+    translate([_box_bottom_idim.x-15, _box_bottom_idim.y-15, 0]) corner_screw_holes(-15, -15);
     translate([_box_bottom_idim.x-15, 15, 0]) corner_screw_holes(-15, 15);
     translate([15, _box_bottom_idim.y-15, 0]) corner_screw_holes(15, -15);
 }
