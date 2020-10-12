@@ -14,8 +14,8 @@ $fn = _PREVIEW ? undef : 48;
 // Set this to true when PREVIEW_3D=false generates layer for laser engraving (mainly for position of screw holes so they can be drilled later)
 ENGRAVE = false;
 
-// box1, box2, box3 are intended to be cut from plywood, panel1 is intended to be cut from acrylic (or PC)
-SHEET = "box1"; // [box1, box2, box3, panel1]
+// box1, box2, box3 are intended to be cut from plywood, panel1 is intended to be cut from acrylic (or PC). lscad enables auto layout with laserscad. (currently not working since laserscad's paging support is not implemented. See https://github.com/mbugert/laserscad/issues/4)
+SHEET = "box1"; // [box1, box2, box3, panel1, lscad]
 
 // Size of panel sheet and box sheets (for reference only)
 SHEET_PANEL = [in(24), in(18)];
@@ -105,11 +105,21 @@ _box_side_f_idim = _box_side_fb_idim;
 _box_side_b_idim = _box_side_fb_idim;
 _box_bottom_idim = _box_tb_idim;
 _box_top_idim = _box_tb_idim;
+_box_pivot_v_button_idim = [INNER_SIZE.z, BUTTON_OFFSET_BACKOFF - BOX_THICKNESS / 2];
+
 
 function account_for_fingers(dim, tb, lr) = [
     dim.x + BOX_THICKNESS * lr,
     dim.y + BOX_THICKNESS * tb,
 ];
+
+_box_side_fb_xdim = account_for_fingers(_box_side_fb_idim, 1, 2);
+_box_side_lr_xdim = account_for_fingers(_box_side_lr_idim, 1, 2);
+_box_top_xdim = _box_top_idim;
+_box_bottom_xdim = account_for_fingers(_box_bottom_idim, 2, 2);
+// TODO
+//_box_pivot_h_xdim = account_for_fingers(_box_side_fb_idim, 1, 0);
+//_box_pivot_v_button_xdim = account_for_fingers(_box_pivot_v_button_idim, 1, 1);
 
 // Accounting for the thickness for lasercut boards
 function as_lcb_center(pos) = pos - BOX_THICKNESS/2;
@@ -123,6 +133,14 @@ module extrude_box() {
 
 module extrude_panel() {
     linear_extrude(PANEL_THICKNESS) children();
+}
+
+// Align box object's outer perimeter to the axis origin
+module box_align_to_op(fingered_x=true, fingered_y=true) {
+    translate([
+        fingered_x ? BOX_THICKNESS : 0,
+        fingered_y ? BOX_THICKNESS : 0,
+    ]) children();
 }
 
 module extrude_box_cutout() {
@@ -331,8 +349,8 @@ module box_pivot_v_button() {
     // TODO alignment tabs on bottom and h pivot
     lasercutoutSquare(
         thickness=BOX_THICKNESS,
-        x=INNER_SIZE.z,
-        y=BUTTON_OFFSET_BACKOFF - BOX_THICKNESS / 2
+        x=_box_pivot_v_button_idim.x,
+        y=_box_pivot_v_button_idim.y
     );
 }
 
@@ -510,7 +528,12 @@ module box3_2d() {
 }
 
 module boxes_lscad() {
-    lpart("box_side_f", _box_side_f_xdim) box_side_f();
+    lpart("box_side_f", _box_side_fb_xdim) box_align_to_op() box_side_f();
+    lpart("box_side_b", _box_side_fb_xdim) box_align_to_op() box_side_b();
+    lpart("box_side_lr_1", _box_side_lr_xdim) box_align_to_op() box_side_lr();
+    lpart("box_side_lr_2", _box_side_lr_xdim) box_align_to_op()box_side_lr();
+    lpart("box_bottom", _box_bottom_xdim) box_align_to_op() box_bottom();
+    lpart("box_top", _box_top_xdim) linear_extrude(BOX_THICKNESS) box_top();
 }
 
 if (_PREVIEW) {
@@ -639,9 +662,12 @@ if (_PREVIEW) {
         box2_2d();
     } else if (SHEET == "box3") {
         box3_2d();
+    } else if (SHEET == "lscad") {
+        echo("LaserSCAD interop");
+        boxes_lscad();
     } else {
         echo("SHEET is undefined or invalid.");
-        echo("Valid options: panel1, box1, box2, box3.");
+        echo("Valid options: panel1, box1, box2, box3, lscad (ONLY use this with laserscad).");
         echo("No shape will be generated.");
     }
 }
