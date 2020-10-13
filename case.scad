@@ -114,7 +114,7 @@ function account_for_fingers(dim, tb, lr) = [
 ];
 
 _box_side_fb_xdim = account_for_fingers(_box_side_fb_idim, 1, 2);
-_box_side_lr_xdim = account_for_fingers(_box_side_lr_idim, 1, 2);
+_box_side_lr_xdim = account_for_fingers(_box_side_lr_idim, 2, 1);
 _box_top_xdim = _box_top_idim;
 _box_bottom_xdim = account_for_fingers(_box_bottom_idim, 2, 2);
 // TODO
