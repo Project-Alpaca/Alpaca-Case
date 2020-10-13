@@ -16,6 +16,7 @@ ENGRAVE = false;
 
 // box1, box2, box3 are intended to be cut from plywood, panel1 is intended to be cut from acrylic (or PC). lscad enables auto layout with laserscad. (currently not working since laserscad's paging support is not implemented. See https://github.com/mbugert/laserscad/issues/4)
 SHEET = "box1"; // [box1, box2, box3, panel1, lscad]
+DRILL_AS = "eng";
 
 // Size of panel sheet and box sheets (for reference only)
 SHEET_PANEL = [in(24), in(18)];
@@ -195,11 +196,17 @@ module box_bottom() {
 }
 
 // Bottom side (engraving layer)
-module eng_box_bottom() {
+module drl_box_bottom() {
     translate([15, 15, 0]) corner_screw_holes(15, 15);
     translate([_box_bottom_idim.x-15, _box_bottom_idim.y-15, 0]) corner_screw_holes(-15, -15);
     translate([_box_bottom_idim.x-15, 15, 0]) corner_screw_holes(-15, 15);
     translate([15, _box_bottom_idim.y-15, 0]) corner_screw_holes(15, -15);
+}
+
+module eng_box_bottom() {
+    if (DRILL_AS == "eng") {
+        drl_box_bottom();
+    }
 }
 
 // Top side (vector cutting layer)
@@ -217,12 +224,18 @@ module box_top() {
 }
 
 // Top side (engraving layer)
-module eng_box_top() {
+module drl_box_top() {
     cut_x = (635-_box_top_idim.x)/2;
     translate([15, 15, 0]) corner_screw_holes(15, 15);
     translate([_box_top_idim.x-15, _box_top_idim.y-15, 0]) corner_screw_holes(-15, -15);
     translate([_box_top_idim.x-15, 15, 0]) corner_screw_holes(-15, 15);
     translate([15, _box_top_idim.y-15, 0]) corner_screw_holes(15, -15);
+}
+
+module eng_box_top() {
+    if (DRILL_AS == "eng") {
+        drl_box_top();
+    }
 }
 
 // Left/right side (vector cutting layer)
@@ -241,11 +254,17 @@ module box_side_lr() {
 }
 
 // Left/right side (engraving layer)
-module eng_box_side_lr() {
+module drl_box_side_lr() {
     translate([15, 15, 0]) corner_screw_holes(15, 15);
     translate([_box_side_lr_idim.x-PANEL_THICKNESS-BOX_THICKNESS-15, _box_side_lr_idim.y-15, 0]) corner_screw_holes(-15, -15);
     translate([_box_side_lr_idim.x-PANEL_THICKNESS-BOX_THICKNESS-15, 15, 0]) corner_screw_holes(-15, 15);
     translate([15, _box_side_lr_idim.y-15, 0]) corner_screw_holes(15, -15);
+}
+
+module eng_box_side_lr() {
+    if (DRILL_AS == "eng") {
+        drl_box_side_lr();
+    }
 }
 
 // Front side (vector cutting layer)
@@ -281,7 +300,7 @@ module box_side_f() {
 }
 
 // Front side (engraving layer)
-module eng_box_side_f() {
+module drl_box_side_f() {
     translate([5/8*_box_side_f_idim.x, _box_side_f_idim.y/2, 0]) {
         footprint_1602_eng();
         translate([70+3, -1.5]) footprint_re_eng();
@@ -292,6 +311,12 @@ module eng_box_side_f() {
     translate([_box_side_f_idim.x-15, 15, 0]) corner_screw_holes(-15, 15);
     translate([55/64*_box_side_f_idim.x, _box_side_f_idim.y/2, 0])
         footprint_control_eng();
+}
+
+module eng_box_side_f() {
+    if (DRILL_AS == "eng") {
+        drl_box_side_f();
+    }
 }
 
 // Back side (vector cutting layer)
@@ -322,13 +347,19 @@ module box_side_b() {
 }
 
 // Back side (engraving layer)
-module eng_box_side_b() {
+module drl_box_side_b() {
     translate([_box_side_b_idim.x-15, _box_side_b_idim.y-PANEL_THICKNESS-BOX_THICKNESS-15, 0]) corner_screw_holes(-15, -15);
     translate([15, _box_side_b_idim.y-PANEL_THICKNESS-BOX_THICKNESS-15, 0]) corner_screw_holes(15, -15);
     translate([15, 15, 0]) corner_screw_holes(15, 15);
     translate([_box_side_b_idim.x-15, 15, 0]) corner_screw_holes(-15, 15);
     translate([_box_side_b_idim.x/4*3, _box_side_b_idim.y/3]) {
         footprint_back_panel_cutout_eng();
+    }
+}
+
+module eng_box_side_b() {
+    if (DRILL_AS == "eng") {
+        drl_box_side_b();
     }
 }
 
@@ -431,7 +462,7 @@ module panel() {
     }
 }
 
-module eng_panel() {
+module drl_panel() {
     cut_x = (635-BOX_SIZE[0])/2;
 
     translate([-cut_x, 0, 0]) {
@@ -451,6 +482,12 @@ module eng_panel() {
     translate([BOX_SIZE.x-15, BOX_SIZE.y-15, 0]) corner_screw_holes(-15, -15);
     translate([BOX_SIZE.x-15, 15, 0]) corner_screw_holes(-15, 15);
     translate([15, BOX_SIZE.y-15, 0]) corner_screw_holes(15, -15);
+}
+
+module eng_panel() {
+    if (DRILL_AS == "eng") {
+        drl_panel();
+    }
 }
 
 module inv_panel() {
