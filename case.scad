@@ -16,7 +16,8 @@ ENGRAVE = false;
 
 // box1, box2, box3 are intended to be cut from plywood, panel1 is intended to be cut from acrylic (or PC). lscad enables auto layout with laserscad. (currently not working since laserscad's paging support is not implemented. See https://github.com/mbugert/laserscad/issues/4)
 SHEET = "box1"; // [box1, box2, box3, panel1, lscad]
-DRILL_AS = "eng";
+// Output drill layer on cut layer for direct cutting or engrave (eng) layer so that they can be drilled later.
+DRILL_AS = "cut"; // [eng, cut]
 
 // Size of panel sheet and box sheets (for reference only)
 SHEET_PANEL = [in(24), in(18)];
@@ -167,7 +168,7 @@ module corner_screw_holes(x, y) {
 }
 
 // Bottom side (vector cutting layer)
-module box_bottom() {
+module _box_bottom() {
     pivot_tab_x = as_lcb_center(_box_bottom_idim.x/2);
     pivot_tab_y = _box_bottom_idim.y;
     lasercutoutSquare(thickness=BOX_THICKNESS,
@@ -195,6 +196,17 @@ module box_bottom() {
                       ]);
 }
 
+module box_bottom() {
+    if (DRILL_AS == "cut") {
+        difference() {
+            _box_bottom();
+            extrude_box() drl_box_bottom();
+        }
+    } else {
+        _box_bottom();
+    }
+}
+
 // Bottom side (engraving layer)
 module drl_box_bottom() {
     translate([15, 15, 0]) corner_screw_holes(15, 15);
@@ -210,7 +222,7 @@ module eng_box_bottom() {
 }
 
 // Top side (vector cutting layer)
-module box_top() {
+module _box_top() {
     difference() {
         square([_box_top_idim.x, _box_top_idim.y]);
         from_button_origin() {
@@ -220,6 +232,17 @@ module box_top() {
             translate(SLIDER_OFFSET_REF)
                 lkp_assy_sensor_center() lkp_assy_profile();
         }
+    }
+}
+
+module box_top() {
+    if (DRILL_AS == "cut") {
+        difference() {
+            _box_top();
+            drl_box_top();
+        }
+    } else {
+        _box_top();
     }
 }
 
@@ -239,7 +262,7 @@ module eng_box_top() {
 }
 
 // Left/right side (vector cutting layer)
-module box_side_lr() {
+module _box_side_lr() {
     lasercutoutSquare(thickness=BOX_THICKNESS,
                       x=_box_side_lr_idim.x,
                       y=_box_side_lr_idim.y,
@@ -253,11 +276,22 @@ module box_side_lr() {
                       ]);
 }
 
+module box_side_lr() {
+    if (DRILL_AS == "cut") {
+        difference() {
+            _box_side_lr();
+            extrude_box() drl_box_side_lr();
+        }
+    } else {
+        _box_side_lr();
+    }
+}
+
 // Left/right side (engraving layer)
 module drl_box_side_lr() {
     translate([15, 15, 0]) corner_screw_holes(15, 15);
-    translate([_box_side_lr_idim.x-PANEL_THICKNESS-BOX_THICKNESS-15, _box_side_lr_idim.y-15, 0]) corner_screw_holes(-15, -15);
-    translate([_box_side_lr_idim.x-PANEL_THICKNESS-BOX_THICKNESS-15, 15, 0]) corner_screw_holes(-15, 15);
+    translate([_box_side_lr_idim.x-15, _box_side_lr_idim.y-15, 0]) corner_screw_holes(-15, -15);
+    translate([_box_side_lr_idim.x-15, 15, 0]) corner_screw_holes(-15, 15);
     translate([15, _box_side_lr_idim.y-15, 0]) corner_screw_holes(15, -15);
 }
 
@@ -268,7 +302,7 @@ module eng_box_side_lr() {
 }
 
 // Front side (vector cutting layer)
-module box_side_f() {
+module _box_side_f() {
     // TODO auxiliary control panel
     pivot_tab_x = as_lcb_center(_box_side_f_idim.x/2);
     pivot_tab_y = _box_side_f_idim.y-PANEL_THICKNESS-BOX_THICKNESS;
@@ -299,14 +333,25 @@ module box_side_f() {
     }
 }
 
+module box_side_f() {
+    if (DRILL_AS == "cut") {
+        difference() {
+            _box_side_f();
+            extrude_box() drl_box_side_f();
+        }
+    } else {
+        _box_side_f();
+    }
+}
+
 // Front side (engraving layer)
 module drl_box_side_f() {
     translate([5/8*_box_side_f_idim.x, _box_side_f_idim.y/2, 0]) {
         footprint_1602_eng();
         translate([70+3, -1.5]) footprint_re_eng();
     }
-    translate([_box_side_f_idim.x-15, _box_side_f_idim.y-PANEL_THICKNESS-BOX_THICKNESS-15, 0]) corner_screw_holes(-15, -15);
-    translate([15, _box_side_f_idim.y-PANEL_THICKNESS-BOX_THICKNESS-15, 0]) corner_screw_holes(15, -15);
+    translate([_box_side_f_idim.x-15, _box_side_f_idim.y-15, 0]) corner_screw_holes(-15, -15);
+    translate([15, _box_side_f_idim.y-15, 0]) corner_screw_holes(15, -15);
     translate([15, 15, 0]) corner_screw_holes(15, 15);
     translate([_box_side_f_idim.x-15, 15, 0]) corner_screw_holes(-15, 15);
     translate([55/64*_box_side_f_idim.x, _box_side_f_idim.y/2, 0])
@@ -320,7 +365,7 @@ module eng_box_side_f() {
 }
 
 // Back side (vector cutting layer)
-module box_side_b() {
+module _box_side_b() {
     pivot_tab_x = _box_side_b_idim.x/2-BOX_THICKNESS/2;
     pivot_tab_y = _box_side_b_idim.y-PANEL_THICKNESS-BOX_THICKNESS;
     difference() {
@@ -346,10 +391,21 @@ module box_side_b() {
     }
 }
 
+module box_side_b() {
+    if (DRILL_AS == "cut") {
+        difference() {
+            _box_side_b();
+            extrude_box() drl_box_side_b();
+        }
+    } else {
+        _box_side_b();
+    }
+}
+
 // Back side (engraving layer)
 module drl_box_side_b() {
-    translate([_box_side_b_idim.x-15, _box_side_b_idim.y-PANEL_THICKNESS-BOX_THICKNESS-15, 0]) corner_screw_holes(-15, -15);
-    translate([15, _box_side_b_idim.y-PANEL_THICKNESS-BOX_THICKNESS-15, 0]) corner_screw_holes(15, -15);
+    translate([_box_side_b_idim.x-15, _box_side_b_idim.y-15, 0]) corner_screw_holes(-15, -15);
+    translate([15, _box_side_b_idim.y-15, 0]) corner_screw_holes(15, -15);
     translate([15, 15, 0]) corner_screw_holes(15, 15);
     translate([_box_side_b_idim.x-15, 15, 0]) corner_screw_holes(-15, 15);
     translate([_box_side_b_idim.x/4*3, _box_side_b_idim.y/3]) {
@@ -444,7 +500,7 @@ module panel_base() {
     }
 }
 
-module panel() {
+module _panel() {
     from_button_origin() {
         difference() {
             panel_base();
@@ -459,6 +515,17 @@ module panel() {
                 }
             }
         }
+    }
+}
+
+module panel() {
+    if (DRILL_AS == "cut") {
+        difference() {
+            _panel();
+            drl_box_bottom();
+        }
+    } else {
+        _box_bottom();
     }
 }
 
