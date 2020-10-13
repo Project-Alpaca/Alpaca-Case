@@ -7,3 +7,6 @@
 [submodule "ext/LKP-Assy"]
 	path = ext/LKP-Assy
 	url = https://github.com/Project-Alpaca/LKP-Assy.git
+[submodule "ext/laserscad-alt"]
+	path = ext/laserscad-alt
+	url = https://github.com/dogtopus/laserscad-alt.git

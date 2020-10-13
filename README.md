@@ -17,12 +17,24 @@ The OpenSCAD Customizer is used in this project as a quick, non-invasive way to 
 
 ### laserscad
 
-**NOTE**: laserscad does not support paging shapes across multiple sheets (i.e. multi bin packing) yet. So this option does not do much at this point.
+Make sure Python 3.8+ and pipenv are installed.
+
+After checkout or update, run
+
+```sh
+PIPENV_PIPFILE=ext/laserscad-alt/Pipfile pipenv install
+```
 
 To use laserscad support, run
 
 ```sh
-pushd ext/laserscad/dist
-make cut OFLAGS='-D SHEET='"'"'"lscad"'"'"'' model=../../../case.scad
-popd
+PIPENV_PIPFILE=ext/laserscad-alt/Pipfile pipenv run python ext/laserscad-alt/lscad.py cut case.scad <page_width>x<page_height> -D '{"SHEET": "lscad"}'
+```
+
+Replace `cut` with `engrave` to generate engrave data. (WIP)
+
+To use preview, run
+
+```sh
+PIPENV_PIPFILE=ext/laserscad-alt/Pipfile pipenv run python ext/laserscad-alt/lscad.py preview case.scad <page_width>x<page_height> -D '{"SHEET": "lscad", "PREVIEW_3D": false}'
 ```
