@@ -200,7 +200,7 @@ module box_bottom() {
     if (DRILL_AS == "cut") {
         difference() {
             _box_bottom();
-            extrude_box() drl_box_bottom();
+            extrude_box_cutout() drl_box_bottom();
         }
     } else {
         _box_bottom();
@@ -280,7 +280,7 @@ module box_side_lr() {
     if (DRILL_AS == "cut") {
         difference() {
             _box_side_lr();
-            extrude_box() drl_box_side_lr();
+            extrude_box_cutout() drl_box_side_lr();
         }
     } else {
         _box_side_lr();
@@ -337,7 +337,7 @@ module box_side_f() {
     if (DRILL_AS == "cut") {
         difference() {
             _box_side_f();
-            extrude_box() drl_box_side_f();
+            extrude_box_cutout() drl_box_side_f();
         }
     } else {
         _box_side_f();
@@ -395,7 +395,7 @@ module box_side_b() {
     if (DRILL_AS == "cut") {
         difference() {
             _box_side_b();
-            extrude_box() drl_box_side_b();
+            extrude_box_cutout() drl_box_side_b();
         }
     } else {
         _box_side_b();
