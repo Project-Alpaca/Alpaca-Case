@@ -676,7 +676,13 @@ if (_PREVIEW) {
     }
 
     if (PREVIEW_MOUNTING) {
-        // TODO New mounting system
+        // corners
+        translate([0, 0, BOX_THICKNESS]) {
+            corner_support();
+            translate([INNER_SIZE.x, 0]) rotate([0, 0, 90]) corner_support();
+            translate([INNER_SIZE.x, INNER_SIZE.y]) rotate([0, 0, 180]) corner_support();
+            translate([0, INNER_SIZE.y]) rotate([0, 0, 270]) corner_support();
+        }
     }
 
     if (PREVIEW_LEFT_WALL) {
