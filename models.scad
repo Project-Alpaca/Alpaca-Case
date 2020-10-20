@@ -24,7 +24,7 @@ HSI_DEPTH = 3.6;
 HSI_DEPTH_MULTIPLIER = 1.5;
 
 // Diameter of the taper (set this and HSI_DEPTH_TAPER to -1 to disable taper)
-HSI_D_TAPER = 4.2;
+HSI_D_TAPER = 4.5;
 
 // Depth of the taper (set this and HSI_D_TAPER to-1 to disable taper)
 HSI_DEPTH_TAPER = 1.0;

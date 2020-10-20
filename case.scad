@@ -119,9 +119,11 @@ _box_side_fb_xdim = account_for_fingers(_box_side_fb_idim, 1, 2);
 _box_side_lr_xdim = account_for_fingers(_box_side_lr_idim, 2, 1);
 _box_top_xdim = _box_top_idim;
 _box_bottom_xdim = account_for_fingers(_box_bottom_idim, 2, 2);
-// TODO
-//_box_pivot_h_xdim = account_for_fingers(_box_side_fb_idim, 1, 0);
-//_box_pivot_v_button_xdim = account_for_fingers(_box_pivot_v_button_idim, 1, 1);
+
+// 1 group of fingers on the bottom
+_box_pivot_h_xdim = account_for_fingers(_box_side_fb_idim, 1, 0);
+// 1 group of fingers on the vertical pivot and 1 group on the bottom
+_box_pivot_v_button_xdim = account_for_fingers(_box_pivot_v_button_idim, 1, 1);
 
 // Accounting for the thickness for lasercut boards
 function as_lcb_center(pos) = pos - BOX_THICKNESS/2;
@@ -143,6 +145,12 @@ module box_align_to_op(fingered_x=true, fingered_y=true) {
         fingered_x ? BOX_THICKNESS : 0,
         fingered_y ? BOX_THICKNESS : 0,
     ]) children();
+}
+
+module copy_to_pivot_center() {
+    for (i=[-1:3]) {
+        translate([BUTTON_OFFSET.x+as_lcb_center(button_gap_center(i)+BOX_THICKNESS/2), 0, BOX_THICKNESS]) children();
+    }
 }
 
 module extrude_box_cutout() {
@@ -437,7 +445,11 @@ module box_pivot_v_button() {
     lasercutoutSquare(
         thickness=BOX_THICKNESS,
         x=_box_pivot_v_button_idim.x,
-        y=_box_pivot_v_button_idim.y
+        y=_box_pivot_v_button_idim.y,
+        simple_tabs =[
+            [UP, _box_pivot_v_button_idim.x / 2, _box_pivot_v_button_idim.y],
+            [LEFT, 0, _box_pivot_v_button_idim.y / 2],
+        ]
     );
 }
 
@@ -632,12 +644,22 @@ module box3_2d() {
 }
 
 module boxes_lscad() {
-    lpart("box_side_f", _box_side_fb_xdim) box_align_to_op() box_side_f();
-    lpart("box_side_b", _box_side_fb_xdim) box_align_to_op() box_side_b();
-    lpart("box_side_lr_1", _box_side_lr_xdim) box_align_to_op() box_side_lr();
-    lpart("box_side_lr_2", _box_side_lr_xdim) box_align_to_op()box_side_lr();
-    lpart("box_bottom", _box_bottom_xdim) box_align_to_op() box_bottom();
-    lpart("box_top", _box_top_xdim) linear_extrude(BOX_THICKNESS) box_top();
+    lpart("box_side_f", _box_side_fb_xdim)
+        box_align_to_op() box_side_f();
+    lpart("box_side_b", _box_side_fb_xdim)
+        box_align_to_op() box_side_b();
+    lpart("box_side_lr_1", _box_side_lr_xdim)
+        box_align_to_op() box_side_lr();
+    lpart("box_side_lr_2", _box_side_lr_xdim)
+        box_align_to_op() box_side_lr();
+    lpart("box_bottom", _box_bottom_xdim)
+        box_align_to_op() box_bottom();
+    lpart("box_top", _box_top_xdim) linear_extrude(BOX_THICKNESS)
+        box_top();
+    for (index_pv=[0:4]) {
+        lpart(str("box_pivot_v_button_", index_pv), _box_pivot_v_button_xdim) 
+            box_align_to_op(fingered_y=false) box_pivot_v_button();
+    }
 }
 
 if (_PREVIEW) {
@@ -667,11 +689,7 @@ if (_PREVIEW) {
             translate([0, as_lcb_center(BUTTON_OFFSET_BACKOFF+BOX_THICKNESS), BOX_THICKNESS])
             rotate([90, 0, 0])
                 box_pivot_h();
-            for (i=[-1:3]) {
-                translate([BUTTON_OFFSET.x+as_lcb_center(button_gap_center(i)+BOX_THICKNESS), 0, BOX_THICKNESS])
-                rotate([0, -90, 0])
-                    box_pivot_v_button();
-            }
+            copy_to_pivot_center() translate([BOX_THICKNESS/2, 0, 0]) rotate([0, -90, 0]) box_pivot_v_button();
         }
     }
 
@@ -683,6 +701,7 @@ if (_PREVIEW) {
             translate([INNER_SIZE.x, INNER_SIZE.y]) rotate([0, 0, 180]) corner_support();
             translate([0, INNER_SIZE.y]) rotate([0, 0, 270]) corner_support();
         }
+        copy_to_pivot_center() translate([0, _box_pivot_v_button_idim.y / 2, INNER_SIZE.z]) pivot_holder();
     }
 
     if (PREVIEW_LEFT_WALL) {
