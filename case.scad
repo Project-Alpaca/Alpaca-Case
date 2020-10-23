@@ -148,9 +148,9 @@ module box_align_to_op(fingered_x=true, fingered_y=true) {
     ]) children();
 }
 
-module copy_to_pivot_center() {
+module copy_to_pivot_center(x_only=false) {
     for (i=[-1:3]) {
-        translate([BUTTON_OFFSET.x+as_lcb_center(button_gap_center(i)+BOX_THICKNESS/2), 0, BOX_THICKNESS]) children();
+        translate([BUTTON_OFFSET.x+as_lcb_center(button_gap_center(i)+BOX_THICKNESS/2), 0, x_only ? 0 : BOX_THICKNESS]) children();
     }
 }
 
@@ -257,11 +257,12 @@ module box_top() {
 
 // Top side (engraving layer)
 module drl_box_top() {
-    cut_x = (635-_box_top_idim.x)/2;
-    translate([15, 15, 0]) corner_screw_holes(15, 15);
-    translate([_box_top_idim.x-15, _box_top_idim.y-15, 0]) corner_screw_holes(-15, -15);
-    translate([_box_top_idim.x-15, 15, 0]) corner_screw_holes(-15, 15);
-    translate([15, _box_top_idim.y-15, 0]) corner_screw_holes(15, -15);
+    copy_to_pivot_center(x_only=true) translate([0, _box_pivot_v_button_idim.y / 2])
+        pivot_holder(profile="drill_vmount");
+    //translate([15, 15, 0]) corner_screw_holes(15, 15);
+    //translate([_box_top_idim.x-15, _box_top_idim.y-15, 0]) corner_screw_holes(-15, -15);
+    //translate([_box_top_idim.x-15, 15, 0]) corner_screw_holes(-15, 15);
+    //translate([15, _box_top_idim.y-15, 0]) corner_screw_holes(15, -15);
 }
 
 module eng_box_top() {
@@ -359,10 +360,12 @@ module drl_box_side_f() {
         footprint_1602_eng();
         translate([70+3, -1.5]) footprint_re_eng();
     }
-    translate([_box_side_f_idim.x-15, _box_side_f_idim.y-15, 0]) corner_screw_holes(-15, -15);
-    translate([15, _box_side_f_idim.y-15, 0]) corner_screw_holes(15, -15);
-    translate([15, 15, 0]) corner_screw_holes(15, 15);
-    translate([_box_side_f_idim.x-15, 15, 0]) corner_screw_holes(-15, 15);
+    copy_to_pivot_center(x_only=true) translate([0, _box_pivot_v_button_idim.x / 2])
+        pivot_holder(profile="drill_vmount");
+    //translate([_box_side_f_idim.x-15, _box_side_f_idim.y-15, 0]) corner_screw_holes(-15, -15);
+    //translate([15, _box_side_f_idim.y-15, 0]) corner_screw_holes(15, -15);
+    //translate([15, 15, 0]) corner_screw_holes(15, 15);
+    //translate([_box_side_f_idim.x-15, 15, 0]) corner_screw_holes(-15, 15);
     translate([55/64*_box_side_f_idim.x, _box_side_f_idim.y/2, 0])
         footprint_control_eng();
 }
@@ -567,33 +570,21 @@ module panel() {
     if (DRILL_AS == "cut") {
         difference() {
             _panel();
-            drl_box_bottom();
+            drl_panel();
         }
     } else {
-        _box_bottom();
+        _panel();
     }
 }
 
 module drl_panel() {
-    cut_x = (635-BOX_SIZE[0])/2;
-
-    translate([-cut_x, 0, 0]) {
-        translate([BUTTON_OFFSET_REF.x, BUTTON_OFFSET_REF.y, 0]) translate([1.5*BUTTON_DIST, 115, 0]) {
-            // Slider position reference
-            //%square([510, 64], true);
-            // SoftPot reference
-            //translate([0, 10-32-6, 0]) {
-                //%square([500, 20], true);
-                // TODO replace with LKP
-                //footprint_softpot_mount(invert=true, tail_cut=false);
-            //}
-        }
-    }
     // TODO re-layout
-    translate([15, 15, 0]) corner_screw_holes(15, 15);
-    translate([BOX_SIZE.x-15, BOX_SIZE.y-15, 0]) corner_screw_holes(-15, -15);
-    translate([BOX_SIZE.x-15, 15, 0]) corner_screw_holes(-15, 15);
-    translate([15, BOX_SIZE.y-15, 0]) corner_screw_holes(15, -15);
+    copy_to_pivot_center(x_only=true) translate([0, _box_pivot_v_button_idim.y / 2])
+        pivot_holder(profile="drill_vmount");
+    //translate([15, 15, 0]) corner_screw_holes(15, 15);
+    //translate([BOX_SIZE.x-15, BOX_SIZE.y-15, 0]) corner_screw_holes(-15, -15);
+    //translate([BOX_SIZE.x-15, 15, 0]) corner_screw_holes(-15, 15);
+    //translate([15, BOX_SIZE.y-15, 0]) corner_screw_holes(15, -15);
 }
 
 module eng_panel() {
@@ -681,10 +672,10 @@ module boxes_lscad() {
         box_align_to_op() box_side_f();
     lpart("box_side_b", _box_side_fb_xdim)
         box_align_to_op() box_side_b();
-    lpart("box_side_lr_1", _box_side_lr_xdim)
-        box_align_to_op() box_side_lr();
-    lpart("box_side_lr_2", _box_side_lr_xdim)
-        box_align_to_op() box_side_lr();
+    for (index_lr=[0:1]) {
+        lpart(str("box_side_lr_", index_lr), _box_side_lr_xdim)
+            box_align_to_op() box_side_lr();
+    }
     lpart("box_bottom", _box_bottom_xdim)
         box_align_to_op() box_bottom();
     lpart("box_top", _box_top_xdim) linear_extrude(BOX_THICKNESS)

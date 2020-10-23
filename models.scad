@@ -168,6 +168,8 @@ module pivot_holder(thickness=BOX_THICKNESS, profile="3d", hsi_d_min=HSI_D_MIN, 
         translate([0, -hsi_cube_size.z / 2]) square([hsi_cube_size.y, hsi_cube_size.z], center=true);
     } else if (profile == "drill") {
         translate([0, -hsi_cube_size.z - hsi_cube_size.y / 2]) circle(d=3.4);
+    } else if (profile == "drill_vmount") {
+        circle(d=3.4);
     }
 }
 
