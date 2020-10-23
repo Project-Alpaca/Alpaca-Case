@@ -108,6 +108,7 @@ _box_side_b_idim = _box_side_fb_idim;
 _box_bottom_idim = _box_tb_idim;
 _box_top_idim = _box_tb_idim;
 _box_pivot_v_button_idim = [INNER_SIZE.z, BUTTON_OFFSET_BACKOFF - BOX_THICKNESS / 2];
+_box_pivot_h_idim = [INNER_SIZE.x, INNER_SIZE.z];
 
 
 function account_for_fingers(dim, tb, lr) = [
@@ -121,7 +122,7 @@ _box_top_xdim = _box_top_idim;
 _box_bottom_xdim = account_for_fingers(_box_bottom_idim, 2, 2);
 
 // 1 group of fingers on the bottom
-_box_pivot_h_xdim = account_for_fingers(_box_side_fb_idim, 1, 0);
+_box_pivot_h_xdim = account_for_fingers(_box_pivot_h_idim, 1, 0);
 // 1 group of fingers on the vertical pivot and 1 group on the bottom
 _box_pivot_v_button_xdim = account_for_fingers(_box_pivot_v_button_idim, 1, 1);
 
@@ -432,25 +433,57 @@ module box_pivot_h() {
     // TODO alignment tabs
     lasercutoutSquare(
         thickness=BOX_THICKNESS,
-        x=INNER_SIZE.x,
-        y=INNER_SIZE.z
+        x=_box_pivot_h_idim.x,
+        y=_box_pivot_h_idim.y
     );
 }
 
 // Vertical pivot (between main buttons)
 module box_pivot_v_button() {
+    if (DRILL_AS == "cut") {
+        difference() {
+            _box_pivot_v_button();
+            extrude_box_cutout() drl_box_pivot_v_button();
+        }
+    } else {
+        _box_pivot_v_button();
+    }
+}
+
+module _box_pivot_v_button() {
     // Rotate by Y axis by -90deg
     // local X = global Z, local Y = global Y
     // TODO alignment tabs on bottom and h pivot
-    lasercutoutSquare(
-        thickness=BOX_THICKNESS,
-        x=_box_pivot_v_button_idim.x,
-        y=_box_pivot_v_button_idim.y,
-        simple_tabs =[
-            [UP, _box_pivot_v_button_idim.x / 2, _box_pivot_v_button_idim.y],
-            [LEFT, 0, _box_pivot_v_button_idim.y / 2],
-        ]
-    );
+    difference() {
+        lasercutoutSquare(
+            thickness=BOX_THICKNESS,
+            x=_box_pivot_v_button_idim.x,
+            y=_box_pivot_v_button_idim.y,
+            simple_tabs =[
+                [UP, _box_pivot_v_button_idim.x / 2, _box_pivot_v_button_idim.y],
+                [LEFT, 0, _box_pivot_v_button_idim.y / 2],
+            ]
+        );
+        translate([_box_pivot_v_button_idim.x, _box_pivot_v_button_idim.y / 2])
+            rotate([0, 0, -90]) extrude_box_cutout() pivot_holder(profile="cut");
+        translate([_box_pivot_v_button_idim.x / 2, 0])
+            rotate([0, 0, 180]) extrude_box_cutout() pivot_holder(profile="cut");
+    }
+}
+
+module drl_box_pivot_v_button() {
+    translate([_box_pivot_v_button_idim.x, _box_pivot_v_button_idim.y / 2])
+            rotate([0, 0, -90])
+        pivot_holder(profile="drill");
+    translate([_box_pivot_v_button_idim.x / 2, 0])
+            rotate([0, 0, 180])
+        pivot_holder(profile="drill");
+}
+
+module eng_box_pivot_v_button() {
+    if (DRILL_AS == "eng") {
+        drl_box_pivot_v_button();
+    }
 }
 
 // Support platform for capacitive slider module
@@ -660,6 +693,8 @@ module boxes_lscad() {
         lpart(str("box_pivot_v_button_", index_pv), _box_pivot_v_button_xdim) 
             box_align_to_op(fingered_y=false) box_pivot_v_button();
     }
+    lpart("box_pivot_h", _box_pivot_h_xdim)
+        box_align_to_op(fingered_x=false) box_pivot_h();
 }
 
 if (_PREVIEW) {
@@ -701,7 +736,10 @@ if (_PREVIEW) {
             translate([INNER_SIZE.x, INNER_SIZE.y]) rotate([0, 0, 180]) corner_support();
             translate([0, INNER_SIZE.y]) rotate([0, 0, 270]) corner_support();
         }
-        copy_to_pivot_center() translate([0, _box_pivot_v_button_idim.y / 2, INNER_SIZE.z]) pivot_holder();
+        copy_to_pivot_center() {
+            translate([0, _box_pivot_v_button_idim.y / 2, _box_pivot_v_button_idim.x]) pivot_holder();
+            translate([0, 0, _box_pivot_v_button_idim.x / 2]) rotate([90, 0, 0]) pivot_holder();
+        }
     }
 
     if (PREVIEW_LEFT_WALL) {

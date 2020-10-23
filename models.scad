@@ -15,7 +15,7 @@ MOUNTING_WALL_THICKNESS = 8;
 /* [Heat set inserts (HSI) parameters] */
 
 // Diameter of the hole. Should be slightly smaller than the outer diameter of HSI.
-HSI_D_MIN = 4.0;
+HSI_D_MIN = 3.8;
 
 // Depth of the hole or total length of the HSI.
 HSI_DEPTH = 3.6;
@@ -24,7 +24,7 @@ HSI_DEPTH = 3.6;
 HSI_DEPTH_MULTIPLIER = 1.5;
 
 // Diameter of the taper (set this and HSI_DEPTH_TAPER to -1 to disable taper)
-HSI_D_TAPER = 4.5;
+HSI_D_TAPER = 4.3;
 
 // Depth of the taper (set this and HSI_D_TAPER to-1 to disable taper)
 HSI_DEPTH_TAPER = 1.0;
@@ -110,7 +110,7 @@ module mounting_bracket() {
 }
 
 module corner_support(inner_height=INNER_HEIGHT, hsi_d_min=HSI_D_MIN, hsi_depth=HSI_DEPTH*HSI_DEPTH_MULTIPLIER, hsi_d_taper=HSI_D_TAPER, hsi_depth_taper=HSI_DEPTH_TAPER) {
-    triangle_side = 32;
+    triangle_side = 30;
     triangle_center = triangle_side / 4;
     difference() {
         linear_extrude(INNER_HEIGHT) polygon([
@@ -133,7 +133,7 @@ module corner_support(inner_height=INNER_HEIGHT, hsi_d_min=HSI_D_MIN, hsi_depth=
     }
 }
 
-module pivot_holder(thickness=BOX_THICKNESS, hsi_d_min=HSI_D_MIN, hsi_depth=HSI_DEPTH*HSI_DEPTH_MULTIPLIER, hsi_d_taper=HSI_D_TAPER, hsi_depth_taper=HSI_DEPTH_TAPER) {
+module pivot_holder(thickness=BOX_THICKNESS, profile="3d", hsi_d_min=HSI_D_MIN, hsi_depth=HSI_DEPTH*HSI_DEPTH_MULTIPLIER, hsi_d_taper=HSI_D_TAPER, hsi_depth_taper=HSI_DEPTH_TAPER) {
     module _x_clamp() {
         translate([-thickness/2, 0, -hsi_cube_size.y/2])
                 rotate([0, -90, 0]) {
@@ -155,15 +155,23 @@ module pivot_holder(thickness=BOX_THICKNESS, hsi_d_min=HSI_D_MIN, hsi_depth=HSI_
     }
     m3_nut_width_min = 5.5;
     hsi_y = max(hsi_d_min+2, m3_nut_width_min+0.5+2*1);
-    hsi_cube_size = [max(hsi_d_min+2, thickness + 2*1 + hsi_y), hsi_y, hsi_depth+0.6];
+    hsi_cube_size = [max(hsi_d_min+2, thickness + 2*1 + hsi_y), hsi_y, hsi_depth+2];
 
-    difference() {
-        mirror([0, 0, 1]) linear_extrude(hsi_cube_size.z) square([hsi_cube_size.x, hsi_cube_size.y], center=true);
-        hsi(hsi_d_min, hsi_depth, hsi_d_taper, hsi_depth_taper);
+    if (profile == "3d") {
+        difference() {
+            mirror([0, 0, 1]) linear_extrude(hsi_cube_size.z) square([hsi_cube_size.x, hsi_cube_size.y], center=true);
+            hsi(hsi_d_min, hsi_depth, hsi_d_taper, hsi_depth_taper);
+        }
+        translate([0, 0, -hsi_cube_size.z]) _x_clamp();
+        mirror([1, 0, 0]) translate([0, 0, -hsi_cube_size.z]) _x_clamp();
+    } else if (profile == "cut") {
+        translate([0, -hsi_cube_size.z / 2]) square([hsi_cube_size.y, hsi_cube_size.z], center=true);
+    } else if (profile == "drill") {
+        translate([0, -hsi_cube_size.z - hsi_cube_size.y / 2]) circle(d=3.4);
     }
-    translate([0, 0, -hsi_cube_size.z]) _x_clamp();
-    mirror([1, 0, 0]) translate([0, 0, -hsi_cube_size.z]) _x_clamp();
 }
+
+
 
 if (ITEM == "printed_io_shield") {
     printed_io_shield();
