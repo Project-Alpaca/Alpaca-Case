@@ -150,10 +150,10 @@ module box_align_to_op(fingered_x=true, fingered_y=true) {
     ]) children();
 }
 
-function pivot_index(i) = BUTTON_OFFSET.x+as_lcb_center(button_gap_center(i)+BOX_THICKNESS/2);
+function pivot_index(i) = BUTTON_OFFSET.x+as_lcb_center(button_gap_center(i-1)+BOX_THICKNESS/2);
 
 module copy_to_pivot_center(x_only=false) {
-    for (i=[-1:3]) {
+    for (i=[0:4]) {
         translate([pivot_index(i), 0, x_only ? 0 : BOX_THICKNESS]) children();
     }
 }
