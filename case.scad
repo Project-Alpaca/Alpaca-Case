@@ -48,6 +48,8 @@ PREVIEW_PIVOT = true;
 PREVIEW_LKP_PLATFORM = true;
 // LKP
 PREVIEW_LKP = true;
+// Button preview
+PREVIEW_BUTTONS = true;
 
 /* [Hidden] */
 
@@ -809,6 +811,15 @@ if (_PREVIEW) {
         // LKP-Assy sink z offset
             lkp_assy_zposition()
             lkp_demo_assy_centered();
+    }
+    if (PREVIEW_BUTTONS) {
+        from_button_origin() {
+            for (i=[0:BUTTON_DIST:BUTTON_DIST*3]) {
+                translate([i, 0, INNER_SIZE.z-4]) {
+                    %adafruit_1185_dummy_shim();
+                }
+            }
+        }
     }
 
 } else {

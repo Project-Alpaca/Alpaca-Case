@@ -173,6 +173,10 @@ module pivot_holder(thickness=BOX_THICKNESS, profile="3d", hsi_d_min=HSI_D_MIN, 
     }
 }
 
+module adafruit_1185_dummy_shim() {
+    import("ext/adafruit-1185.stl");
+}
+
 
 
 if (ITEM == "printed_io_shield") {
