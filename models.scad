@@ -109,27 +109,37 @@ module mounting_bracket() {
     }
 }
 
-module corner_support(inner_height=INNER_HEIGHT, hsi_d_min=HSI_D_MIN, hsi_depth=HSI_DEPTH*HSI_DEPTH_MULTIPLIER, hsi_d_taper=HSI_D_TAPER, hsi_depth_taper=HSI_DEPTH_TAPER) {
+module corner_support(inner_height=INNER_HEIGHT, profile="3d", hsi_d_min=HSI_D_MIN, hsi_depth=HSI_DEPTH*HSI_DEPTH_MULTIPLIER, hsi_d_taper=HSI_D_TAPER, hsi_depth_taper=HSI_DEPTH_TAPER) {
     triangle_side = 30;
     triangle_center = triangle_side / 4;
-    difference() {
-        linear_extrude(INNER_HEIGHT) polygon([
-            [0, 0],
-            [triangle_side, 0],
-            [0, triangle_side],
-        ]);
-        translate([triangle_center, triangle_center]) {
-            translate([0, 0, inner_height]) hsi(hsi_d_min, hsi_depth, hsi_d_taper, hsi_depth_taper);
-            mirror([0, 0, 1]) hsi(hsi_d_min, hsi_depth, hsi_d_taper, hsi_depth_taper);
+    if (profile == "3d") {
+        difference() {
+            linear_extrude(INNER_HEIGHT) polygon([
+                [0, 0],
+                [triangle_side, 0],
+                [0, triangle_side],
+            ]);
+            translate([triangle_center, triangle_center]) {
+                translate([0, 0, inner_height]) hsi(hsi_d_min, hsi_depth, hsi_d_taper, hsi_depth_taper);
+                mirror([0, 0, 1]) hsi(hsi_d_min, hsi_depth, hsi_d_taper, hsi_depth_taper);
+            }
+            rotate([0, -90, 0]) {
+                translate([inner_height / 4, triangle_side / 2, 0]) #hsi(hsi_d_min, hsi_depth, hsi_d_taper, hsi_depth_taper);
+                translate([inner_height * 3 / 4, triangle_side / 2, 0]) #hsi(hsi_d_min, hsi_depth, hsi_d_taper, hsi_depth_taper);
+            }
+            rotate([90, 0, 0]) {
+                translate([triangle_side / 2, inner_height / 4, 0]) #hsi(hsi_d_min, hsi_depth, hsi_d_taper, hsi_depth_taper);
+                translate([triangle_side / 2, inner_height * 3 / 4, 0]) #hsi(hsi_d_min, hsi_depth, hsi_d_taper, hsi_depth_taper);
+            }
         }
-        rotate([0, -90, 0]) {
-            translate([inner_height / 4, triangle_side / 2, 0]) #hsi(hsi_d_min, hsi_depth, hsi_d_taper, hsi_depth_taper);
-            translate([inner_height * 3 / 4, triangle_side / 2, 0]) #hsi(hsi_d_min, hsi_depth, hsi_d_taper, hsi_depth_taper);
-        }
-        rotate([90, 0, 0]) {
-            translate([triangle_side / 2, inner_height / 4, 0]) #hsi(hsi_d_min, hsi_depth, hsi_d_taper, hsi_depth_taper);
-            translate([triangle_side / 2, inner_height * 3 / 4, 0]) #hsi(hsi_d_min, hsi_depth, hsi_d_taper, hsi_depth_taper);
-        }
+    } else if (profile == "drill-side") {
+        translate([triangle_side / 2, inner_height / 4]) circle(d=3.4);
+        translate([triangle_side / 2, inner_height * 3 / 4]) circle(d=3.4);
+    } else if (profile == "drill-side-h") {
+        translate([inner_height / 4, triangle_side / 2]) circle(d=3.4);
+        translate([inner_height * 3 / 4, triangle_side / 2]) circle(d=3.4);
+    } else if (profile == "drill-top") {
+        translate([triangle_center, triangle_center]) circle(d=3.4);
     }
 }
 
