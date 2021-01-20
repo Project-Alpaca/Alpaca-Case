@@ -17,7 +17,7 @@ The OpenSCAD Customizer is used in this project as a quick, non-invasive way to 
 
 ### laserscad
 
-Make sure Python 3.8+ and pipenv are installed.
+Make sure Python 3.9 and pipenv are installed.
 
 After checkout or update, run
 
