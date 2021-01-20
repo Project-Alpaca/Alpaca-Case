@@ -140,6 +140,12 @@ module corner_support(inner_height=INNER_HEIGHT, profile="3d", hsi_d_min=HSI_D_M
         translate([inner_height * 3 / 4, triangle_side / 2]) circle(d=3.4);
     } else if (profile == "drill-top") {
         translate([triangle_center, triangle_center]) circle(d=3.4);
+    } else if (profile == "profile") {
+        polygon([
+            [0, 0],
+            [triangle_side, 0],
+            [0, triangle_side],
+        ]);
     }
 }
 

@@ -111,6 +111,7 @@ _box_bottom_idim = _box_tb_idim;
 _box_top_idim = _box_tb_idim;
 _box_pivot_v_button_idim = [INNER_SIZE.z, BUTTON_OFFSET_BACKOFF - BOX_THICKNESS / 2];
 _box_pivot_h_idim = [INNER_SIZE.x, INNER_SIZE.z];
+_box_lkp_platform_idim = [INNER_SIZE.x, INNER_SIZE.y - BUTTON_OFFSET_BACKOFF - BOX_THICKNESS / 2];
 
 
 function account_for_fingers(dim, tb, lr) = [
@@ -518,11 +519,42 @@ module eng_box_pivot_v_button() {
 
 // Support platform for capacitive slider module
 module box_lkp_platform() {
-    lasercutoutSquare(
-        thickness=BOX_THICKNESS,
-        x=INNER_SIZE.x,
-        y=INNER_SIZE.y - BUTTON_OFFSET_BACKOFF - BOX_THICKNESS / 2
-    );
+    if (DRILL_AS == "cut") {
+        difference() {
+            _box_lkp_platform();
+            extrude_box_cutout() drl_box_lkp_platform();
+        }
+    } else {
+        _box_lkp_platform();
+    }
+}
+
+module _box_lkp_platform() {
+    difference() {
+        lasercutoutSquare(
+            thickness=BOX_THICKNESS,
+            x=_box_lkp_platform_idim.x,
+            y=_box_lkp_platform_idim.y
+        );
+        extrude_box_cutout()
+            translate([0, _box_lkp_platform_idim.y])
+            rotate([0, 0, -90])
+            corner_support(profile="profile");
+        extrude_box_cutout()
+            translate(_box_lkp_platform_idim)
+            rotate([0, 0, 180])
+            corner_support(profile="profile");
+    }
+}
+
+module drl_box_lkp_platform() {
+    // TODO
+}
+
+module eng_box_lkp_platform() {
+    if (DRILL_AS == "eng") {
+        drl_box_lkp_platform();
+    }
 }
 
 // Stock panel shape. Build using this may be more challenging than using the
