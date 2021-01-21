@@ -93,6 +93,7 @@ SLIDER_OFFSET_REF = [1.5*BUTTON_DIST, SLIDER_BOTTOM_Y + SLIDER_SIZE_REF.y/2];
 // Button sits at zero. Therefore teh gap between slider and button (hole) would be (the slider bottom offset - the button radius with notch)
 SLIDER_BUTTON_GAP_CENTER = SLIDER_BOTTOM_Y - ((SLIDER_BOTTOM_Y - BUTTON_R_WITH_NOTCH) / 2) + BUTTON_OFFSET.y;
 BUTTON_OFFSET_BACKOFF = BUTTON_R_WITH_NOTCH + BUTTON_OFFSET.y + BOX_THICKNESS / 2 + 3;
+LKP_PLATFORM_OFFSET = [0, BUTTON_OFFSET_BACKOFF + BOX_THICKNESS / 2];
 
 //SOFTPOT_WIDTH = 20;
 //SOFTPOT_DEADZONE_WIDTH = 6;
@@ -111,7 +112,8 @@ _box_bottom_idim = _box_tb_idim;
 _box_top_idim = _box_tb_idim;
 _box_pivot_v_button_idim = [INNER_SIZE.z, BUTTON_OFFSET_BACKOFF - BOX_THICKNESS / 2];
 _box_pivot_h_idim = [INNER_SIZE.x, INNER_SIZE.z];
-_box_lkp_platform_idim = [INNER_SIZE.x, INNER_SIZE.y - BUTTON_OFFSET_BACKOFF - BOX_THICKNESS / 2];
+_box_lkp_platform_idim = [INNER_SIZE.x, INNER_SIZE.y - LKP_PLATFORM_OFFSET.y];
+_box_pivot_v_slider_idim = [BOX_SIZE.z-PANEL_THICKNESS+lkp_get_assy_zoffset()-BOX_THICKNESS, _box_lkp_platform_idim.y];
 
 
 function account_for_fingers(dim, tb, lr) = [
@@ -128,6 +130,9 @@ _box_bottom_xdim = account_for_fingers(_box_bottom_idim, 2, 2);
 _box_pivot_h_xdim = account_for_fingers(_box_pivot_h_idim, 1, 0);
 // 1 group of fingers on the vertical pivot and 1 group on the bottom
 _box_pivot_v_button_xdim = account_for_fingers(_box_pivot_v_button_idim, 1, 1);
+// 1 group of fingers on the vertical pivot and 1 group on the bottom
+_box_pivot_v_slider_xdim = account_for_fingers(_box_pivot_v_slider_idim, 1, 1);
+_box_lkp_platform_xdim = _box_lkp_platform_idim;
 
 // Accounting for the thickness for lasercut boards
 function as_lcb_center(pos) = pos - BOX_THICKNESS/2;
@@ -156,6 +161,12 @@ function pivot_index(i) = BUTTON_OFFSET.x+as_lcb_center(button_gap_center(i-1)+B
 module copy_to_pivot_center(x_only=false) {
     for (i=[0:4]) {
         translate([pivot_index(i), 0, x_only ? 0 : BOX_THICKNESS]) children();
+    }
+}
+
+module copy_to_slider_pivot_center(x_only=false) {
+    for (i=[0:3]) {
+        translate([pivot_index(i+0.5), 0, x_only ? 0 : BOX_THICKNESS]) children();
     }
 }
 
@@ -484,7 +495,6 @@ module box_pivot_v_button() {
 module _box_pivot_v_button() {
     // Rotate by Y axis by -90deg
     // local X = global Z, local Y = global Y
-    // TODO alignment tabs on bottom and h pivot
     difference() {
         lasercutoutSquare(
             thickness=BOX_THICKNESS,
@@ -514,6 +524,45 @@ module drl_box_pivot_v_button() {
 module eng_box_pivot_v_button() {
     if (DRILL_AS == "eng") {
         drl_box_pivot_v_button();
+    }
+}
+
+//Vertical pivot for slider
+module box_pivot_v_slider() {
+    if (DRILL_AS == "cut") {
+        difference() {
+            _box_pivot_v_slider();
+            extrude_box_cutout() drl_box_pivot_v_slider();
+        }
+    } else {
+        _box_pivot_v_slider();
+    }
+}
+
+module _box_pivot_v_slider() {
+    // Rotate by Y axis by -90deg
+    // local X = global Z, local Y = global Y
+    difference() {
+        lasercutoutSquare(
+            thickness=BOX_THICKNESS,
+            x=_box_pivot_v_slider_idim.x,
+            y=_box_pivot_v_slider_idim.y,
+            simple_tabs =[
+                [DOWN, _box_pivot_v_slider_idim.x / 2, 0],
+                [LEFT, 0, _box_pivot_v_slider_idim.y / 2],
+            ]
+        );
+        // TODO pivot holders
+    }
+}
+
+module drl_box_pivot_v_slider() {
+    // TODO
+}
+
+module eng_box_pivot_v_slider() {
+    if (DRILL_AS == "eng") {
+        drl_box_pivot_v_slider();
     }
 }
 
@@ -744,8 +793,14 @@ module boxes_lscad() {
         lpart(str("box_pivot_v_button_", index_pv), _box_pivot_v_button_xdim) 
             box_align_to_op(fingered_y=false) box_pivot_v_button();
     }
+    for (index_pv=[0:3]) {
+        lpart(str("box_pivot_v_slider_", index_pv), _box_pivot_v_slider_xdim) 
+            box_align_to_op() box_pivot_v_slider();
+    }
     lpart("box_pivot_h", _box_pivot_h_xdim)
         box_align_to_op(fingered_x=false) box_pivot_h();
+    lpart("box_lkp_platform", _box_lkp_platform_xdim)
+        box_lkp_platform();
 }
 
 if (_PREVIEW) {
@@ -761,7 +816,7 @@ if (_PREVIEW) {
     if (PREVIEW_LKP_PLATFORM) {
         color("Blue", 0.5)
         translate([0,
-                   BUTTON_OFFSET_BACKOFF + BOX_THICKNESS / 2,
+                   LKP_PLATFORM_OFFSET.y,
                    BOX_SIZE.z-PANEL_THICKNESS])
             translate([0, 0, lkp_get_assy_zoffset()])
             box_lkp_platform();
@@ -776,6 +831,7 @@ if (_PREVIEW) {
             rotate([90, 0, 0])
                 box_pivot_h();
             copy_to_pivot_center() translate([BOX_THICKNESS/2, 0, 0]) rotate([0, -90, 0]) box_pivot_v_button();
+            copy_to_slider_pivot_center() translate([BOX_THICKNESS/2, LKP_PLATFORM_OFFSET.y, 0]) rotate([0, -90, 0]) box_pivot_v_slider();
         }
     }
 
