@@ -2,6 +2,8 @@
 
 Laser cut case for Alpaca.
 
+![case.webp](./case.webp)
+
 ## Usage
 
 - Don't forget to checkout all submodules by using `git submodule update --init --recursive`.
