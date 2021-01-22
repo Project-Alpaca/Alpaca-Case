@@ -149,7 +149,7 @@ module corner_support(inner_height=INNER_HEIGHT, profile="3d", hsi_d_min=HSI_D_M
     }
 }
 
-module pivot_holder(thickness=BOX_THICKNESS, profile="3d", hsi_d_min=HSI_D_MIN, hsi_depth=HSI_DEPTH*HSI_DEPTH_MULTIPLIER, hsi_d_taper=HSI_D_TAPER, hsi_depth_taper=HSI_DEPTH_TAPER) {
+module pivot_holder(thickness=BOX_THICKNESS, profile="3d", hsi_d_min=HSI_D_MIN, hsi_depth=HSI_DEPTH*HSI_DEPTH_MULTIPLIER, hsi_d_taper=HSI_D_TAPER, hsi_depth_taper=HSI_DEPTH_TAPER, align_y="c") {
     module _x_clamp() {
         translate([-thickness/2, 0, -hsi_cube_size.y/2])
                 rotate([0, -90, 0]) {
@@ -172,20 +172,23 @@ module pivot_holder(thickness=BOX_THICKNESS, profile="3d", hsi_d_min=HSI_D_MIN, 
     m3_nut_width_min = 5.5;
     hsi_y = max(hsi_d_min+2, m3_nut_width_min+0.5+2*1);
     hsi_cube_size = [max(hsi_d_min+2, thickness + 2*1 + hsi_y), hsi_y, hsi_depth+2];
+    y_offset = align_y == "+" ? hsi_y / 2 : (align_y == "-" ? (-hsi_y / 2) : 0);
 
     if (profile == "3d") {
-        difference() {
-            mirror([0, 0, 1]) linear_extrude(hsi_cube_size.z) square([hsi_cube_size.x, hsi_cube_size.y], center=true);
-            hsi(hsi_d_min, hsi_depth, hsi_d_taper, hsi_depth_taper);
+        translate([0, y_offset, 0]) {
+            difference() {
+                mirror([0, 0, 1]) linear_extrude(hsi_cube_size.z) square([hsi_cube_size.x, hsi_cube_size.y], center=true);
+                hsi(hsi_d_min, hsi_depth, hsi_d_taper, hsi_depth_taper);
+            }
+            translate([0, 0, -hsi_cube_size.z]) _x_clamp();
+            mirror([1, 0, 0]) translate([0, 0, -hsi_cube_size.z]) _x_clamp();
         }
-        translate([0, 0, -hsi_cube_size.z]) _x_clamp();
-        mirror([1, 0, 0]) translate([0, 0, -hsi_cube_size.z]) _x_clamp();
     } else if (profile == "cut") {
-        translate([0, -hsi_cube_size.z / 2]) square([hsi_cube_size.y, hsi_cube_size.z], center=true);
+        translate([-y_offset, -hsi_cube_size.z / 2]) square([hsi_cube_size.y, hsi_cube_size.z], center=true);
     } else if (profile == "drill") {
-        translate([0, -hsi_cube_size.z - hsi_cube_size.y / 2]) circle(d=3.4);
+        translate([-y_offset, -hsi_cube_size.z - hsi_cube_size.y / 2]) circle(d=3.4);
     } else if (profile == "drill_vmount") {
-        circle(d=3.4);
+        translate([0, y_offset]) circle(d=3.4);
     }
 }
 
@@ -202,7 +205,7 @@ if (ITEM == "printed_io_shield") {
 } else if (ITEM == "corner_support") {
     corner_support();
 } else if (ITEM == "pivot_holder") {
-    pivot_holder();
+    pivot_holder(profile="drill_vmount", align_y="+");
 } else {
     echo("Usage: openscad -DITEM=model -o output.stl models.scad");
     echo("Accepted model: printed_io_shield, mounting_bracket, corner_support, pivot_holder");
