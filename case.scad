@@ -230,6 +230,10 @@ module _box_bottom() {
                           [MID, 2/5 * _box_pivot_h_idim.x - BOX_THICKNESS / 2, pivot_h_y],
                           [MID, 3/5 * _box_pivot_h_idim.x - BOX_THICKNESS / 2, pivot_h_y],
                           [MID, 4/5 * _box_pivot_h_idim.x - BOX_THICKNESS / 2, pivot_h_y],
+                          [MID, pivot_index(0.5) - BOX_THICKNESS / 2, LKP_PLATFORM_OFFSET.y + (_box_pivot_v_slider_idim.y / 2 - BOX_THICKNESS / 2)],
+                          [MID, pivot_index(1.5) - BOX_THICKNESS / 2, LKP_PLATFORM_OFFSET.y + (_box_pivot_v_slider_idim.y / 2 - BOX_THICKNESS / 2)],
+                          [MID, pivot_index(2.5) - BOX_THICKNESS / 2, LKP_PLATFORM_OFFSET.y + (_box_pivot_v_slider_idim.y / 2 - BOX_THICKNESS / 2)],
+                          [MID, pivot_index(3.5) - BOX_THICKNESS / 2, LKP_PLATFORM_OFFSET.y + (_box_pivot_v_slider_idim.y / 2 - BOX_THICKNESS / 2)],
                       ]);
 }
 
@@ -476,6 +480,10 @@ module box_pivot_h() {
             [MID, pivot_index(2) - BOX_THICKNESS / 2, _box_pivot_v_button_idim.x / 2 - BOX_THICKNESS / 2],
             [MID, pivot_index(3) - BOX_THICKNESS / 2, _box_pivot_v_button_idim.x / 2 - BOX_THICKNESS / 2],
             [MID, pivot_index(4) - BOX_THICKNESS / 2, _box_pivot_v_button_idim.x / 2 - BOX_THICKNESS / 2],
+            [MID, pivot_index(0.5) - BOX_THICKNESS / 2, _box_pivot_v_slider_idim.x / 2 - BOX_THICKNESS / 2],
+            [MID, pivot_index(1.5) - BOX_THICKNESS / 2, _box_pivot_v_slider_idim.x / 2 - BOX_THICKNESS / 2],
+            [MID, pivot_index(2.5) - BOX_THICKNESS / 2, _box_pivot_v_slider_idim.x / 2 - BOX_THICKNESS / 2],
+            [MID, pivot_index(3.5) - BOX_THICKNESS / 2, _box_pivot_v_slider_idim.x / 2 - BOX_THICKNESS / 2],
         ]
     );
 }
