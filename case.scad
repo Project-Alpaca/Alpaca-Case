@@ -89,11 +89,15 @@ BUTTON_R_WITH_NOTCH = (ARCADE_BUTTON_100MM_HOLE_DIA + ARCADE_BUTTON_100MM_NOTCH_
 SLIDER_SIZE_REF = [500, 40];
 // Bottom of the slider, starts from the center of the buttons.
 SLIDER_BOTTOM_Y = 75;
+// Center of the slider, starts from the center of the buttons.
 SLIDER_OFFSET_REF = [1.5*BUTTON_DIST, SLIDER_BOTTOM_Y + SLIDER_SIZE_REF.y/2];
 // Button sits at zero. Therefore teh gap between slider and button (hole) would be (the slider bottom offset - the button radius with notch)
 SLIDER_BUTTON_GAP_CENTER = SLIDER_BOTTOM_Y - ((SLIDER_BOTTOM_Y - BUTTON_R_WITH_NOTCH) / 2) + BUTTON_OFFSET.y;
 BUTTON_OFFSET_BACKOFF = BUTTON_R_WITH_NOTCH + BUTTON_OFFSET.y + BOX_THICKNESS / 2 + 3;
 LKP_PLATFORM_OFFSET = [0, BUTTON_OFFSET_BACKOFF + BOX_THICKNESS / 2];
+
+// Center of the slider, starts from the bottom left of slider platform.
+SLIDER_OFFSET_PLATFORM = SLIDER_OFFSET_REF + BUTTON_OFFSET - LKP_PLATFORM_OFFSET;
 
 //SOFTPOT_WIDTH = 20;
 //SOFTPOT_DEADZONE_WIDTH = 6;
@@ -622,6 +626,8 @@ module _box_lkp_platform() {
             translate(_box_lkp_platform_idim)
             rotate([0, 0, 180])
             corner_support(profile="profile");
+        // LKP PCB cutout
+        translate(SLIDER_OFFSET_PLATFORM) extrude_box_cutout() lkp_assy_cut_profile_centered();
     }
 }
 
@@ -632,6 +638,7 @@ module drl_box_lkp_platform() {
         pivot_holder_w(profile="drill_vmount", align_y="+");
     }
     // TODO drill profile for LKP
+    translate(SLIDER_OFFSET_PLATFORM) lkp_assy_drill_profile_centered();
 }
 
 module eng_box_lkp_platform() {
