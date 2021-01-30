@@ -255,10 +255,15 @@ module box_bottom() {
 
 // Bottom side (engraving layer)
 module drl_box_bottom() {
+    // 4 corners
     corner_support_w(profile="drill-top");
     translate([_box_bottom_idim.x, 0]) rotate([0, 0, 90]) corner_support_w(profile="drill-top");
     translate([_box_bottom_idim.x, _box_bottom_idim.y]) rotate([0, 0, 180]) corner_support_w(profile="drill-top");
     translate([0, _box_bottom_idim.y]) rotate([0, 0, 270]) corner_support_w(profile="drill-top");
+
+    // button pivots
+    translate([0, PIVOT_CORNER_OFFSET_Y]) rotate([0, 0, 270])corner_support_w(profile="drill-top");
+    translate([_box_bottom_idim.x, PIVOT_CORNER_OFFSET_Y]) rotate([0, 0, 180]) corner_support_w(profile="drill-top");
 }
 
 module eng_box_bottom() {
@@ -294,13 +299,19 @@ module box_top() {
 
 // Top side (engraving layer)
 module drl_box_top() {
+    // pivot holders
     copy_to_pivot_center(x_only=true) translate([0, _box_pivot_v_button_idim.y / 2])
         pivot_holder_w(profile="drill_vmount");
 
+    // 4 corners
     corner_support_w(profile="drill-top");
     translate([_box_bottom_idim.x, 0]) rotate([0, 0, 90]) corner_support_w(profile="drill-top");
     translate([_box_bottom_idim.x, _box_bottom_idim.y]) rotate([0, 0, 180]) corner_support_w(profile="drill-top");
     translate([0, _box_bottom_idim.y]) rotate([0, 0, 270]) corner_support_w(profile="drill-top");
+
+    // pivot corners
+    translate([0, PIVOT_CORNER_OFFSET_Y]) rotate([0, 0, 270]) corner_support_w(profile="drill-top");
+    translate([_box_bottom_idim.x, PIVOT_CORNER_OFFSET_Y]) rotate([0, 0, 180]) corner_support_w(profile="drill-top");
 }
 
 module eng_box_top() {
@@ -324,11 +335,22 @@ module _box_side_lr() {
                       ]);
 }
 
-module box_side_lr() {
+module box_side_left() {
     if (DRILL_AS == "cut") {
         difference() {
             _box_side_lr();
-            extrude_box_cutout() drl_box_side_lr();
+            extrude_box_cutout() drl_box_side_left();
+        }
+    } else {
+        _box_side_lr();
+    }
+}
+
+module box_side_right() {
+    if (DRILL_AS == "cut") {
+        difference() {
+            _box_side_lr();
+            extrude_box_cutout() drl_box_side_right();
         }
     } else {
         _box_side_lr();
@@ -336,14 +358,27 @@ module box_side_lr() {
 }
 
 // Left/right side (engraving layer)
-module drl_box_side_lr() {
+module drl_box_side_left() {
     corner_support_w(profile="drill-side-h");
     translate([0, _box_side_lr_idim.y]) mirror([0, 1]) corner_support_w(profile="drill-side-h");
+    translate([0, PIVOT_CORNER_OFFSET_Y]) mirror([0, 1]) corner_support_w(profile="drill-side-h");
 }
 
-module eng_box_side_lr() {
+module drl_box_side_right() {
+    corner_support_w(profile="drill-side-h");
+    translate([0, _box_side_lr_idim.y]) mirror([0, 1]) corner_support_w(profile="drill-side-h");
+    translate([0, _box_side_lr_idim.y - PIVOT_CORNER_OFFSET_Y]) corner_support_w(profile="drill-side-h");
+}
+
+module eng_box_side_left() {
     if (DRILL_AS == "eng") {
-        drl_box_side_lr();
+        drl_box_side_left();
+    }
+}
+
+module eng_box_side_right() {
+    if (DRILL_AS == "eng") {
+        drl_box_side_right();
     }
 }
 
@@ -472,7 +507,7 @@ module eng_box_side_b() {
 }
 
 // Horizontal pivot (between slider and main buttons)
-module box_pivot_h() {
+module _box_pivot_h() {
     // TODO alignment tabs
     lasercutoutSquare(
         thickness=BOX_THICKNESS,
@@ -496,6 +531,28 @@ module box_pivot_h() {
             [MID, pivot_index(3.5) - BOX_THICKNESS / 2, _box_pivot_v_slider_idim.x / 2 - BOX_THICKNESS / 2],
         ]
     );
+}
+
+module box_pivot_h() {
+    if (DRILL_AS == "cut") {
+        difference() {
+            _box_pivot_h();
+            extrude_box_cutout() drl_box_pivot_h();
+        }
+    } else {
+        _box_pivot_h();
+    }
+}
+
+module drl_box_pivot_h() {
+    corner_support_w(profile="drill-side");
+    translate([_box_pivot_h_idim.x, 0]) mirror([1, 0]) corner_support_w(profile="drill-side");
+}
+
+module eng_box_pivot_h() {
+    if (DRILL_AS == "eng") {
+        drl_box_pivot_h();
+    }
 }
 
 // Vertical pivot (between main buttons)
@@ -728,14 +785,19 @@ module panel() {
 }
 
 module drl_panel() {
-    // TODO re-layout
+    // pivot holders
     copy_to_pivot_center(x_only=true) translate([0, _box_pivot_v_button_idim.y / 2])
         pivot_holder_w(profile="drill_vmount");
 
+    // 4 corners
     corner_support_w(profile="drill-top");
     translate([_box_bottom_idim.x, 0]) rotate([0, 0, 90]) corner_support_w(profile="drill-top");
     translate([_box_bottom_idim.x, _box_bottom_idim.y]) rotate([0, 0, 180]) corner_support_w(profile="drill-top");
     translate([0, _box_bottom_idim.y]) rotate([0, 0, 270]) corner_support_w(profile="drill-top");
+
+    // pivot corners
+    translate([0, PIVOT_CORNER_OFFSET_Y]) rotate([0, 0, 270]) corner_support_w(profile="drill-top");
+    translate([_box_bottom_idim.x, PIVOT_CORNER_OFFSET_Y]) rotate([0, 0, 180]) corner_support_w(profile="drill-top");
 }
 
 module eng_panel() {
@@ -801,16 +863,16 @@ module box3_2d() {
     if (ENGRAVE) {
         translate([BOX_THICKNESS*2+BOX_SIZE.y, 0])
         rotate([0, 0, 90]) {
-            translate([BOX_THICKNESS, BOX_THICKNESS]) eng_box_side_lr();
+            translate([BOX_THICKNESS, BOX_THICKNESS]) eng_box_side_left();
             translate([BOX_THICKNESS*3+BOX_SIZE.z, BOX_THICKNESS])
-                eng_box_side_lr();
+                eng_box_side_right();
         }
     } else {
         translate([BOX_THICKNESS*2+BOX_SIZE.y, 0])
         rotate([0, 0, 90]) {
-            translate([BOX_THICKNESS, BOX_THICKNESS]) projection() box_side_lr();
+            translate([BOX_THICKNESS, BOX_THICKNESS]) projection() box_side_left();
             translate([BOX_THICKNESS*3+BOX_SIZE.z, BOX_THICKNESS]) {
-                projection() box_side_lr();
+                projection() box_side_right();
                 translate([BOX_THICKNESS*2+BOX_SIZE.z, 0])
                     projection() box_pivot();
             }
@@ -823,10 +885,10 @@ module boxes_lscad() {
         box_align_to_op() box_side_f();
     lpart("box_side_b", _box_side_fb_xdim)
         box_align_to_op() box_side_b();
-    for (index_lr=[0:1]) {
-        lpart(str("box_side_lr_", index_lr), _box_side_lr_xdim)
-            box_align_to_op() box_side_lr();
-    }
+    lpart("box_side_left", _box_side_lr_xdim)
+            box_align_to_op() box_side_left();
+    lpart("box_side_right", _box_side_lr_xdim)
+            box_align_to_op() box_side_right();
     lpart("box_bottom", _box_bottom_xdim)
         box_align_to_op() box_bottom();
     lpart("box_top", _box_top_xdim) linear_extrude(BOX_THICKNESS)
@@ -909,8 +971,8 @@ if (_PREVIEW) {
             translate([0,0,BOX_THICKNESS])
             rotate([0, -90, 0])
             difference() {
-                box_side_lr();
-                extrude_box_cutout() eng_box_side_lr();
+                box_side_left();
+                extrude_box_cutout() eng_box_side_left();
             }
     }
 
@@ -919,8 +981,8 @@ if (_PREVIEW) {
             translate([BOX_SIZE.x,BOX_SIZE.y,BOX_THICKNESS])
             rotate([0, -90, 180])
             difference() {
-                box_side_lr();
-                extrude_box_cutout() eng_box_side_lr();
+                box_side_right();
+                extrude_box_cutout() eng_box_side_right();
             }
     }
 
