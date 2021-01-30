@@ -95,6 +95,7 @@ SLIDER_OFFSET_REF = [1.5*BUTTON_DIST, SLIDER_BOTTOM_Y + SLIDER_SIZE_REF.y/2];
 SLIDER_BUTTON_GAP_CENTER = SLIDER_BOTTOM_Y - ((SLIDER_BOTTOM_Y - BUTTON_R_WITH_NOTCH) / 2) + BUTTON_OFFSET.y;
 BUTTON_OFFSET_BACKOFF = BUTTON_R_WITH_NOTCH + BUTTON_OFFSET.y + BOX_THICKNESS / 2 + 3;
 LKP_PLATFORM_OFFSET = [0, BUTTON_OFFSET_BACKOFF + BOX_THICKNESS / 2];
+PIVOT_CORNER_OFFSET_Y = BUTTON_OFFSET_BACKOFF - BOX_THICKNESS/2;
 
 // Center of the slider, starts from the bottom left of slider platform.
 SLIDER_OFFSET_PLATFORM = SLIDER_OFFSET_REF + BUTTON_OFFSET - LKP_PLATFORM_OFFSET;
@@ -883,13 +884,17 @@ if (_PREVIEW) {
             translate([INNER_SIZE.x, 0]) rotate([0, 0, 90]) corner_support_w();
             translate([INNER_SIZE.x, INNER_SIZE.y]) rotate([0, 0, 180]) corner_support_w();
             translate([0, INNER_SIZE.y]) rotate([0, 0, 270]) corner_support_w();
+            translate([0, PIVOT_CORNER_OFFSET_Y]) rotate([0, 0, 270]) corner_support_w();
+            translate([INNER_SIZE.x, PIVOT_CORNER_OFFSET_Y]) rotate([0, 0, 180]) corner_support_w();
         }
+        // button pivot holder
         copy_to_pivot_center() {
             // Top
             translate([0, _box_pivot_v_button_idim.y / 2, _box_pivot_v_button_idim.x]) pivot_holder_w();
             // Front
             translate([0, 0, _box_pivot_v_button_idim.x / 2]) rotate([90, 0, 0]) pivot_holder_w();
         }
+        // slider platform pivot holder
         copy_to_slider_pivot_center() {
             // Top (only some needs to be populated in practice)
             translate([0, LKP_PLATFORM_OFFSET.y, _box_pivot_v_slider_idim.x]) pivot_holder_w(align_y="+");
