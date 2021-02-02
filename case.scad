@@ -685,7 +685,10 @@ module _box_lkp_platform() {
             rotate([0, 0, 180])
             corner_support(profile="profile");
         // LKP PCB cutout
-        translate(SLIDER_OFFSET_PLATFORM) extrude_box_cutout() lkp_assy_cut_profile_centered();
+        translate(SLIDER_OFFSET_PLATFORM) extrude_box_cutout() {
+            lkp_assy_cut_profile_centered();
+            lkp_assy_cable_hole_cut_profile_centered();
+        }
     }
 }
 
