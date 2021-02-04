@@ -403,14 +403,15 @@ module _box_side_f() {
                               //[MID, pivot_tab_x, pivot_tab_y*2/4-BOX_THICKNESS/2],
                               //[MID, pivot_tab_x, pivot_tab_y*3/4-BOX_THICKNESS/2],
                           ]);
-        translate([5/8*_box_side_f_idim.x, _box_side_f_idim.y/2, 0])
-            extrude_box_cutout() {
-                footprint_1602();
-                translate([70+3, -1.5]) footprint_re();
-            }
-        translate([55/64*_box_side_f_idim.x, _box_side_f_idim.y/2, 0])
-            extrude_box_cutout()
-                footprint_control();
+        translate([pivot_index(1.5), _box_side_f_idim.y/2, 0])
+        extrude_box_cutout()
+            footprint_1602();
+        translate([pivot_index(2.5), _box_side_f_idim.y*2/3, 0])
+        extrude_box_cutout()
+            footprint_re();
+        translate([pivot_index(2.5), _box_side_f_idim.y/3, 0])
+        extrude_box_cutout()
+            footprint_control();
     }
 }
 
@@ -427,11 +428,11 @@ module box_side_f() {
 
 // Front side (engraving layer)
 module drl_box_side_f() {
-    translate([5/8*_box_side_f_idim.x, _box_side_f_idim.y/2, 0]) {
+    translate([pivot_index(1.5), _box_side_f_idim.y/2, 0])
         footprint_1602_eng();
-        translate([70+3, -1.5]) footprint_re_eng();
-    }
-    translate([55/64*_box_side_f_idim.x, _box_side_f_idim.y/2, 0])
+    translate([pivot_index(2.5), _box_side_f_idim.y*2/3, 0])
+        footprint_re_eng();
+    translate([pivot_index(2.5), _box_side_f_idim.y/3, 0])
         footprint_control_eng();
 
     copy_to_pivot_center(x_only=true) translate([0, _box_pivot_v_button_idim.x / 2])
@@ -468,7 +469,7 @@ module _box_side_b() {
                               //[MID, pivot_tab_x, pivot_tab_y*2/4-BOX_THICKNESS/2],
                               //[MID, pivot_tab_x, pivot_tab_y*3/4-BOX_THICKNESS/2],
                           ]);
-        translate([_box_side_b_idim.x/4*3, _box_side_b_idim.y/3, 0]) {
+        translate([pivot_index(2), _box_side_b_idim.y/3, 0]) {
             extrude_box_cutout() footprint_back_panel_cutout();
         }
     }
@@ -487,7 +488,7 @@ module box_side_b() {
 
 // Back side (drill layer)
 module drl_box_side_b() {
-    translate([_box_side_b_idim.x/4*3, _box_side_b_idim.y/3]) {
+    translate([pivot_index(2), _box_side_b_idim.y/3]) {
         footprint_back_panel_cutout_eng();
     }
 
