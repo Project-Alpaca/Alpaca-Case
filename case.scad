@@ -403,9 +403,9 @@ module _box_side_f() {
                               //[MID, pivot_tab_x, pivot_tab_y*2/4-BOX_THICKNESS/2],
                               //[MID, pivot_tab_x, pivot_tab_y*3/4-BOX_THICKNESS/2],
                           ]);
-        translate([pivot_index(1.5), _box_side_f_idim.y/2, 0])
-        extrude_box_cutout()
-            footprint_1602();
+        //translate([pivot_index(1.5), _box_side_f_idim.y/2, 0])
+        //extrude_box_cutout()
+        //    footprint_1602();
         translate([pivot_index(2.5), _box_side_f_idim.y*2/3, 0])
         extrude_box_cutout()
             footprint_re();
@@ -428,10 +428,10 @@ module box_side_f() {
 
 // Front side (engraving layer)
 module drl_box_side_f() {
-    translate([pivot_index(1.5), _box_side_f_idim.y/2, 0])
-        footprint_1602_eng();
-    translate([pivot_index(2.5), _box_side_f_idim.y*2/3, 0])
-        footprint_re_eng();
+    //translate([pivot_index(1.5), _box_side_f_idim.y/2, 0])
+    //    footprint_1602_eng();
+    //translate([pivot_index(2.5), _box_side_f_idim.y*2/3, 0])
+    //    footprint_re_eng();
     translate([pivot_index(2.5), _box_side_f_idim.y/3, 0])
         footprint_control_eng();
 
@@ -508,6 +508,7 @@ module eng_box_side_b() {
 }
 
 // Horizontal pivot (between slider and main buttons)
+// TODO: cable holes near center
 module _box_pivot_h() {
     // TODO alignment tabs
     lasercutoutSquare(
@@ -568,6 +569,7 @@ module box_pivot_v_button() {
     }
 }
 
+// TODO inherit this and make the center pivot with OLED mount and inner left/right pivot with cable holes.
 module _box_pivot_v_button() {
     // Rotate by Y axis by -90deg
     // local X = global Z, local Y = global Y
