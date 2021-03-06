@@ -252,13 +252,13 @@ module oled_holder(profile="3d") {
 
     holder_thickness = 2;
     parts_clearance = 4;
-    
+
     mounting_center_clearance = [OLED_MOUNTING_DIA * POLE_CONTACT_EXPANSION_RATE, OLED_MOUNTING_DIA * POLE_CONTACT_EXPANSION_RATE] + [1, 1];
     mounting_size = OLED_MOUNTING_DIST + mounting_center_clearance;
     assy_thickness = holder_thickness + parts_clearance + OLED_MODULE_THICKNESS;
-    echo(assy_thickness=assy_thickness);
+    echo(oled_assy_thickness=assy_thickness);
     sink = max(0, assy_thickness - BOX_THICKNESS);
-    echo(sink=sink);
+    echo(oled_sink=sink);
 
     if (profile == "3d") {
         translate([0, 0, -holder_thickness]) linear_extrude(holder_thickness) {
@@ -284,6 +284,9 @@ module oled_holder(profile="3d") {
         }
     } else if (profile == "drill") {
         translate([0, -sink]) pivot_holder(profile="drill");
+    } else if (profile == "cut-top") {
+        // TODO account for OLED module (if necessary)
+        square(mounting_size, center=true);
     }
 }
 
