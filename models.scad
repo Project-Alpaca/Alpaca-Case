@@ -4,7 +4,7 @@ use <ext/LKP-Assy/hsi.scad>
 $fn = ($preview ? undef : 32);
 
 // Item selection
-ITEM = "none"; // ["none", "printed_io_shield", "mounting_bracket", "corner_support", "pivot_holder"]
+ITEM = "none"; // ["none", "printed_io_shield", "mounting_bracket", "corner_support", "pivot_holder", "oled_holder"]
 
 
 /* [Legacy mounting bracket parameters] */
@@ -41,10 +41,50 @@ PANEL_THICKNESS = 2.032;
 // Outer height
 OUTER_HEIGHT = 95;
 
+
+/* [OLED module parameters] */
+
+// Width of the OLED module
+OLED_MODULE_WIDTH = 27.3;
+
+// Height of the OLED module
+OLED_MODULE_HEIGHT = 27.8;
+
+// Screen-to-PCB thickness of the OLED module.
+OLED_MODULE_THICKNESS = 4;
+
+// PCB thickness of the OLED module.
+OLED_MODULE_PCB_THICKNESS = 1.6;
+
+// X offset of the mounting
+OLED_MOUNTING_OFFSET_X = 2.15;
+
+// Y offset of the mounting
+OLED_MOUNTING_OFFSET_Y = 2.15;
+
+// Distance between the 2 horizontal mounting holes.
+OLED_MOUNTING_DIST_X = 23.0;
+
+// Distance between the 2 vertical mounting holes.
+OLED_MOUNTING_DIST_Y = 23.5;
+
+// Mounting hole diameter
+OLED_MOUNTING_DIA = 2.1;
+
+// Clearance between the OLED module and the back plate. Account for screw head, angled pin header (if used) and components on the back of the OLED module here.
+OLED_BOTTOM_CLEARANCE = 4;
+
+// Expansion rate of the mounting pole contact point on the back plate. The mounting pole diameter is taken and multiplied by this number to calculate the diameter for mounting poles' contact point on the back plate.
+POLE_CONTACT_EXPANSION_RATE = 3;
+
 /* [Hidden] */
 
 // Inner height
 INNER_HEIGHT = OUTER_HEIGHT - BOX_THICKNESS - PANEL_THICKNESS;
+OLED_EDGE_DIM = [OLED_MODULE_WIDTH, OLED_MODULE_HEIGHT];
+OLED_MOUNTING_DIST = [OLED_MOUNTING_DIST_X, OLED_MOUNTING_DIST_Y];
+OLED_MOUNTING_OFFSET = [OLED_MOUNTING_OFFSET_X, OLED_MOUNTING_OFFSET_Y];
+
 
 module printed_io_shield() {
     $fn=25;
@@ -196,6 +236,57 @@ module adafruit_1185_dummy_shim() {
     import("ext/adafruit-1185.stl");
 }
 
+module oled_module_edges() {
+    square(OLED_EDGE_DIM, center=true);
+}
+
+module oled_holder(profile="3d") {
+    module _oled_mounting_pole() {
+        cylinder(
+            h=OLED_BOTTOM_CLEARANCE,
+            r1=OLED_MOUNTING_DIA*POLE_CONTACT_EXPANSION_RATE/2,
+            r2=OLED_MOUNTING_DIA/2
+        );
+        translate([0, 0, OLED_BOTTOM_CLEARANCE]) cylinder(h=OLED_MODULE_PCB_THICKNESS, d=OLED_MOUNTING_DIA);
+    }
+
+    holder_thickness = 2;
+    parts_clearance = 4;
+    
+    mounting_center_clearance = [OLED_MOUNTING_DIA * POLE_CONTACT_EXPANSION_RATE, OLED_MOUNTING_DIA * POLE_CONTACT_EXPANSION_RATE] + [1, 1];
+    mounting_size = OLED_MOUNTING_DIST + mounting_center_clearance;
+    assy_thickness = holder_thickness + parts_clearance + OLED_MODULE_THICKNESS;
+    echo(assy_thickness=assy_thickness);
+    sink = max(0, assy_thickness - BOX_THICKNESS);
+    echo(sink=sink);
+
+    if (profile == "3d") {
+        translate([0, 0, -holder_thickness]) linear_extrude(holder_thickness) {
+            difference() {
+                square(mounting_size, center=true);
+                circle(d=3.2);
+            }
+        }
+        translate([-OLED_MOUNTING_DIST.x/2, -OLED_MOUNTING_DIST.y/2])
+            _oled_mounting_pole();
+        translate([OLED_MOUNTING_DIST.x/2, -OLED_MOUNTING_DIST.y/2])
+            _oled_mounting_pole();
+        translate([OLED_MOUNTING_DIST.x/2, OLED_MOUNTING_DIST.y/2])
+            _oled_mounting_pole();
+        translate([-OLED_MOUNTING_DIST.x/2, OLED_MOUNTING_DIST.y/2])
+            _oled_mounting_pole();
+    } else if (profile == "cut") {
+        translate([0, -sink/2]) {
+            square([mounting_size.y, sink], center=true);
+            translate([0, -sink/2]) {
+                pivot_holder(profile="cut");
+            }
+        }
+    } else if (profile == "drill") {
+        translate([0, -sink]) pivot_holder(profile="drill");
+    }
+}
+
 
 
 if (ITEM == "printed_io_shield") {
@@ -205,7 +296,9 @@ if (ITEM == "printed_io_shield") {
 } else if (ITEM == "corner_support") {
     corner_support();
 } else if (ITEM == "pivot_holder") {
-    pivot_holder(profile="drill_vmount", align_y="+");
+    pivot_holder();
+} else if (ITEM == "oled_holder") {
+    oled_holder();
 } else {
     echo("Usage: openscad -DITEM=model -o output.stl models.scad");
     echo("Accepted model: printed_io_shield, mounting_bracket, corner_support, pivot_holder");
