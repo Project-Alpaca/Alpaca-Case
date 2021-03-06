@@ -240,7 +240,7 @@ module oled_module_edges() {
     square(OLED_EDGE_DIM, center=true);
 }
 
-module oled_holder(profile="3d") {
+module oled_holder(thickness=BOX_THICKNESS, profile="3d", hsi_d_min=HSI_D_MIN, hsi_depth=HSI_DEPTH*HSI_DEPTH_MULTIPLIER, hsi_d_taper=HSI_D_TAPER, hsi_depth_taper=HSI_DEPTH_TAPER) {
     module _oled_mounting_pole() {
         cylinder(
             h=OLED_BOTTOM_CLEARANCE,
@@ -257,10 +257,10 @@ module oled_holder(profile="3d") {
     mounting_size = OLED_MOUNTING_DIST + mounting_center_clearance;
     assy_thickness = holder_thickness + parts_clearance + OLED_MODULE_THICKNESS;
     echo(oled_assy_thickness=assy_thickness);
-    sink = max(0, assy_thickness - BOX_THICKNESS);
+    sink = max(0, assy_thickness - thickness);
     echo(oled_sink=sink);
 
-    if (profile == "3d") {
+    module _oled_holder() {
         translate([0, 0, -holder_thickness]) linear_extrude(holder_thickness) {
             difference() {
                 square(mounting_size, center=true);
@@ -275,11 +275,19 @@ module oled_holder(profile="3d") {
             _oled_mounting_pole();
         translate([-OLED_MOUNTING_DIST.x/2, OLED_MOUNTING_DIST.y/2])
             _oled_mounting_pole();
+    }
+    if (profile == "3d") {
+        _oled_holder();
+    } else if (profile == "3d-assy") {
+        translate([0, 0, -sink]) {
+            translate([0, 0, holder_thickness]) _oled_holder();
+            pivot_holder(thickness=thickness, hsi_d_min=hsi_d_min, hsi_depth=hsi_depth, hsi_d_taper=hsi_d_taper, hsi_depth_taper=hsi_depth_taper);
+        }
     } else if (profile == "cut") {
         translate([0, -sink/2]) {
             square([mounting_size.y, sink], center=true);
             translate([0, -sink/2]) {
-                pivot_holder(profile="cut");
+                pivot_holder(profile="cut", hsi_d_min=hsi_d_min, hsi_depth=hsi_depth, hsi_d_taper=hsi_d_taper, hsi_depth_taper=hsi_depth_taper);
             }
         }
     } else if (profile == "drill") {
@@ -289,7 +297,6 @@ module oled_holder(profile="3d") {
         square(mounting_size, center=true);
     }
 }
-
 
 
 if (ITEM == "printed_io_shield") {

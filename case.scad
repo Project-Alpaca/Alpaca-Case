@@ -169,6 +169,16 @@ module copy_to_pivot_center(x_only=false) {
     }
 }
 
+module copy_to_pivot_center_no_oled(x_only=false) {
+    for (i=[0, 1, 3, 4]) {
+        translate([pivot_index(i), 0, x_only ? 0 : BOX_THICKNESS]) children();
+    }
+}
+
+module move_to_pivot_center_oled(x_only=false) {
+    translate([pivot_index(2), 0, x_only ? 0 : BOX_THICKNESS]) children();
+}
+
 module copy_to_slider_pivot_center(x_only=false) {
     for (i=[0:3]) {
         translate([pivot_index(i+0.5), 0, x_only ? 0 : BOX_THICKNESS]) children();
@@ -204,6 +214,10 @@ module pivot_holder_w(profile="3d", align_y="c") {
 
 module corner_support_w(profile="3d") {
     corner_support(inner_height=INNER_SIZE.z, profile=profile);
+}
+
+module oled_holder_w(profile="3d-assy") {
+    oled_holder(thickness=BOX_THICKNESS, profile=profile);
 }
 
 // Bottom side (vector cutting layer)
@@ -283,6 +297,9 @@ module _box_top() {
             translate(SLIDER_OFFSET_REF)
                 lkp_assy_sensor_center() lkp_assy_profile();
         }
+        move_to_pivot_center_oled(x_only=true)
+            translate([0, _box_pivot_v_button_idim.y / 5])
+            oled_holder_w(profile="cut-top");
     }
 }
 
@@ -469,9 +486,10 @@ module _box_side_b() {
                               //[MID, pivot_tab_x, pivot_tab_y*2/4-BOX_THICKNESS/2],
                               //[MID, pivot_tab_x, pivot_tab_y*3/4-BOX_THICKNESS/2],
                           ]);
-        translate([pivot_index(2), _box_side_b_idim.y/3, 0]) {
-            extrude_box_cutout() footprint_back_panel_cutout();
-        }
+        move_to_pivot_center_oled(x_only=true)
+            translate([0, _box_side_b_idim.y/3, 0])
+            extrude_box_cutout()
+            footprint_back_panel_cutout();
     }
 }
 
@@ -488,9 +506,9 @@ module box_side_b() {
 
 // Back side (drill layer)
 module drl_box_side_b() {
-    translate([pivot_index(2), _box_side_b_idim.y/3]) {
+    move_to_pivot_center_oled(x_only=true)
+        translate([0, _box_side_b_idim.y/3])
         footprint_back_panel_cutout_eng();
-    }
 
     corner_support_w(profile="drill-side");
     translate([_box_side_f_idim.x, 0]) mirror([1, 0]) corner_support_w(profile="drill-side");
@@ -604,6 +622,41 @@ module drl_box_pivot_v_button() {
 module eng_box_pivot_v_button() {
     if (DRILL_AS == "eng") {
         drl_box_pivot_v_button();
+    }
+}
+
+module _box_pivot_v_button_oled() {
+    difference() {
+        _box_pivot_v_button();
+        // TODO do some checks on this so it will always fit (or give an error if it's impossible)
+        translate([_box_pivot_v_button_idim.x, _box_pivot_v_button_idim.y / 5])
+            rotate([0, 0, -90])
+            extrude_box_cutout()
+            oled_holder_w(profile="cut");
+    }
+}
+
+module box_pivot_v_button_oled() {
+    if (DRILL_AS == "cut") {
+        difference() {
+            _box_pivot_v_button_oled();
+            extrude_box_cutout() drl_box_pivot_v_button_oled();
+        }
+    } else {
+        _box_pivot_v_button_oled();
+    }
+}
+
+module drl_box_pivot_v_button_oled() {
+    drl_box_pivot_v_button();
+    translate([_box_pivot_v_button_idim.x, _box_pivot_v_button_idim.y / 5])
+        rotate([0, 0, -90])
+        oled_holder_w(profile="drill");
+}
+
+module eng_box_pivot_v_button_oled() {
+    if (DRILL_AS == "eng") {
+        drl_box_pivot_v_button_oled();
     }
 }
 
@@ -899,10 +952,13 @@ module boxes_lscad() {
         box_align_to_op() box_bottom();
     lpart("box_top", _box_top_xdim) linear_extrude(BOX_THICKNESS)
         box_top();
-    for (index_pv=[0:4]) {
+    for (index_pv=[0, 1, 3, 4]) {
         lpart(str("box_pivot_v_button_", index_pv), _box_pivot_v_button_xdim) 
             box_align_to_op(fingered_y=false) box_pivot_v_button();
     }
+    lpart("box_pivot_v_button_oled", _box_pivot_v_button_xdim) 
+        box_align_to_op(fingered_y=false)
+        box_pivot_v_button_oled();
     for (index_pv=[0:3]) {
         lpart(str("box_pivot_v_slider_", index_pv), _box_pivot_v_slider_xdim) 
             box_align_to_op() box_pivot_v_slider();
@@ -937,10 +993,18 @@ if (_PREVIEW) {
             //rotate([0, -90, 0])
             //    box_pivot();
             // original pos is outside edge
+            // horizontal pivot
             translate([0, as_lcb_center(BUTTON_OFFSET_BACKOFF+BOX_THICKNESS), BOX_THICKNESS])
             rotate([90, 0, 0])
                 box_pivot_h();
-            copy_to_pivot_center() translate([BOX_THICKNESS/2, 0, 0]) rotate([0, -90, 0]) box_pivot_v_button();
+            // vertical pivot (button side)
+            copy_to_pivot_center_no_oled() translate([BOX_THICKNESS/2, 0, 0]) rotate([0, -90, 0]) box_pivot_v_button();
+            // vertical pivot (button side with OLED mount)
+            move_to_pivot_center_oled()
+                translate([BOX_THICKNESS/2, 0, 0])
+                rotate([0, -90, 0])
+                box_pivot_v_button_oled();
+            // vertical pivot (slider side)
             copy_to_slider_pivot_center() translate([BOX_THICKNESS/2, LKP_PLATFORM_OFFSET.y, 0]) rotate([0, -90, 0]) box_pivot_v_slider();
         }
     }
@@ -962,6 +1026,9 @@ if (_PREVIEW) {
             // Front
             translate([0, 0, _box_pivot_v_button_idim.x / 2]) rotate([90, 0, 0]) pivot_holder_w();
         }
+        move_to_pivot_center_oled()
+            translate([0, _box_pivot_v_button_idim.y / 5, _box_pivot_v_button_idim.x])
+            oled_holder_w();
         // slider platform pivot holder
         copy_to_slider_pivot_center() {
             // Top (only some needs to be populated in practice)
