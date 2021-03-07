@@ -528,29 +528,36 @@ module eng_box_side_b() {
 // Horizontal pivot (between slider and main buttons)
 // TODO: cable holes near center
 module _box_pivot_h() {
-    // TODO alignment tabs
-    lasercutoutSquare(
-        thickness=BOX_THICKNESS,
-        x=_box_pivot_h_idim.x,
-        y=_box_pivot_h_idim.y,
-        simple_tabs=[
-            [DOWN, 1/5 * _box_pivot_h_idim.x, 0],
-            [DOWN, 2/5 * _box_pivot_h_idim.x, 0],
-            [DOWN, 3/5 * _box_pivot_h_idim.x, 0],
-            [DOWN, 4/5 * _box_pivot_h_idim.x, 0],
-        ],
-        simple_tab_holes=[
-            [MID, pivot_index(0) - BOX_THICKNESS / 2, _box_pivot_v_button_idim.x / 2 - BOX_THICKNESS / 2],
-            [MID, pivot_index(1) - BOX_THICKNESS / 2, _box_pivot_v_button_idim.x / 2 - BOX_THICKNESS / 2],
-            [MID, pivot_index(2) - BOX_THICKNESS / 2, _box_pivot_v_button_idim.x / 2 - BOX_THICKNESS / 2],
-            [MID, pivot_index(3) - BOX_THICKNESS / 2, _box_pivot_v_button_idim.x / 2 - BOX_THICKNESS / 2],
-            [MID, pivot_index(4) - BOX_THICKNESS / 2, _box_pivot_v_button_idim.x / 2 - BOX_THICKNESS / 2],
-            [MID, pivot_index(0.5) - BOX_THICKNESS / 2, _box_pivot_v_slider_idim.x / 2 - BOX_THICKNESS / 2],
-            [MID, pivot_index(1.5) - BOX_THICKNESS / 2, _box_pivot_v_slider_idim.x / 2 - BOX_THICKNESS / 2],
-            [MID, pivot_index(2.5) - BOX_THICKNESS / 2, _box_pivot_v_slider_idim.x / 2 - BOX_THICKNESS / 2],
-            [MID, pivot_index(3.5) - BOX_THICKNESS / 2, _box_pivot_v_slider_idim.x / 2 - BOX_THICKNESS / 2],
-        ]
-    );
+    difference() {
+        lasercutoutSquare(
+            thickness=BOX_THICKNESS,
+            x=_box_pivot_h_idim.x,
+            y=_box_pivot_h_idim.y,
+            simple_tabs=[
+                [DOWN, 1/5 * _box_pivot_h_idim.x, 0],
+                [DOWN, 2/5 * _box_pivot_h_idim.x, 0],
+                [DOWN, 3/5 * _box_pivot_h_idim.x, 0],
+                [DOWN, 4/5 * _box_pivot_h_idim.x, 0],
+            ],
+            simple_tab_holes=[
+                [MID, pivot_index(0) - BOX_THICKNESS / 2, _box_pivot_v_button_idim.x / 2 - BOX_THICKNESS / 2],
+                [MID, pivot_index(1) - BOX_THICKNESS / 2, _box_pivot_v_button_idim.x / 2 - BOX_THICKNESS / 2],
+                [MID, pivot_index(2) - BOX_THICKNESS / 2, _box_pivot_v_button_idim.x / 2 - BOX_THICKNESS / 2],
+                [MID, pivot_index(3) - BOX_THICKNESS / 2, _box_pivot_v_button_idim.x / 2 - BOX_THICKNESS / 2],
+                [MID, pivot_index(4) - BOX_THICKNESS / 2, _box_pivot_v_button_idim.x / 2 - BOX_THICKNESS / 2],
+                [MID, pivot_index(0.5) - BOX_THICKNESS / 2, _box_pivot_v_slider_idim.x / 2 - BOX_THICKNESS / 2],
+                [MID, pivot_index(1.5) - BOX_THICKNESS / 2, _box_pivot_v_slider_idim.x / 2 - BOX_THICKNESS / 2],
+                [MID, pivot_index(2.5) - BOX_THICKNESS / 2, _box_pivot_v_slider_idim.x / 2 - BOX_THICKNESS / 2],
+                [MID, pivot_index(3.5) - BOX_THICKNESS / 2, _box_pivot_v_slider_idim.x / 2 - BOX_THICKNESS / 2],
+            ]
+        );
+        for (i=[1:3]) {
+            extrude_box_cutout() hull() {
+                translate([pivot_index(i-0.2), _box_pivot_h_idim.y / 4]) circle(r=10);
+                translate([pivot_index(i+0.2), _box_pivot_h_idim.y / 4]) circle(r=10);
+            }
+        }
+    }
 }
 
 module box_pivot_h() {
@@ -680,9 +687,13 @@ module _box_pivot_v_slider() {
             thickness=BOX_THICKNESS,
             x=_box_pivot_v_slider_idim.x,
             y=_box_pivot_v_slider_idim.y,
-            simple_tabs =[
+            simple_tabs=[
                 [DOWN, _box_pivot_v_slider_idim.x / 2, 0],
                 [LEFT, 0, _box_pivot_v_slider_idim.y / 2],
+            ],
+            circles_remove=[
+                // Slider cable holes
+                [10, _box_pivot_v_slider_idim.x, _box_pivot_v_slider_idim.y / 2],
             ]
         );
         // top

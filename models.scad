@@ -277,7 +277,7 @@ module oled_holder(thickness=BOX_THICKNESS, profile="3d", hsi_d_min=HSI_D_MIN, h
             _oled_mounting_pole();
     }
     if (profile == "3d") {
-        _oled_holder();
+        translate([0, 0, holder_thickness]) _oled_holder();
     } else if (profile == "3d-assy") {
         translate([0, 0, -sink]) {
             translate([0, 0, holder_thickness]) _oled_holder();
