@@ -14,7 +14,7 @@ $fn = _PREVIEW ? undef : 48;
 // Set this to true when PREVIEW_3D=false generates layer for laser engraving (mainly for position of screw holes so they can be drilled later)
 ENGRAVE = false;
 
-// box1, box2, box3 are intended to be cut from plywood, panel1 is intended to be cut from acrylic (or PC). lscad enables auto layout with laserscad. (currently requires our fork of laserscad with our custom layout script. See https://github.com/mbugert/laserscad/issues/4)
+// box1, box2, box3 are intended to be cut from plywood, panel1 is intended to be cut from acrylic. lscad enables auto layout with laserscad. (currently requires our fork of laserscad with our custom layout script. See https://github.com/mbugert/laserscad/issues/4)
 SHEET = "box1"; // [box1, box2, box3, panel1, lscad]
 // Output drill layer on cut layer for direct cutting or engrave (eng) layer so that they can be drilled later.
 DRILL_AS = "cut"; // [eng, cut]
