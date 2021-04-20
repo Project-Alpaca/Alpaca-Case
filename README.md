@@ -33,6 +33,8 @@ To use laserscad support, run
 PIPENV_PIPFILE=ext/laserscad-alt/Pipfile pipenv run python ext/laserscad-alt/lscad.py cut case.scad <page_width>x<page_height> -D '{"SHEET": "lscad", "PREVIEW_3D": false}'
 ```
 
+(Parameters for HSI and/or LKP-Assy can be added by specifing extra parameters in the JSON object. e.g. `'{"SHEET": "lscad", "PREVIEW_3D": false, "LKP_PCB_TOTAL_LENGTH": 517, "HSI_DEPTH": 4.2}'`.)
+
 Replace `cut` with `engrave` to generate engrave data. (WIP)
 
 To use preview, run
