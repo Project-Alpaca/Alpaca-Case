@@ -4,7 +4,7 @@ use <ext/LKP-Assy/hsi.scad>
 $fn = ($preview ? undef : 32);
 
 // Item selection
-ITEM = "none"; // ["none", "printed_io_shield", "mounting_bracket", "corner_support", "pivot_holder", "oled_holder"]
+ITEM = "none"; // ["none", "printed_io_shield", "mounting_bracket", "corner_support", "support_holder", "oled_holder"]
 
 
 /* [Legacy mounting bracket parameters] */
@@ -189,7 +189,7 @@ module corner_support(inner_height=INNER_HEIGHT, profile="3d", hsi_d_min=HSI_D_M
     }
 }
 
-module pivot_holder(thickness=BOX_THICKNESS, profile="3d", hsi_d_min=HSI_D_MIN, hsi_depth=HSI_DEPTH*HSI_DEPTH_MULTIPLIER, hsi_d_taper=HSI_D_TAPER, hsi_depth_taper=HSI_DEPTH_TAPER, align_y="c") {
+module support_holder(thickness=BOX_THICKNESS, profile="3d", hsi_d_min=HSI_D_MIN, hsi_depth=HSI_DEPTH*HSI_DEPTH_MULTIPLIER, hsi_d_taper=HSI_D_TAPER, hsi_depth_taper=HSI_DEPTH_TAPER, align_y="c") {
     module _x_clamp() {
         translate([-thickness/2, 0, -hsi_cube_size.y/2])
                 rotate([0, -90, 0]) {
@@ -281,17 +281,17 @@ module oled_holder(thickness=BOX_THICKNESS, profile="3d", hsi_d_min=HSI_D_MIN, h
     } else if (profile == "3d-assy") {
         translate([0, 0, -sink]) {
             translate([0, 0, holder_thickness]) _oled_holder();
-            pivot_holder(thickness=thickness, hsi_d_min=hsi_d_min, hsi_depth=hsi_depth, hsi_d_taper=hsi_d_taper, hsi_depth_taper=hsi_depth_taper);
+            support_holder(thickness=thickness, hsi_d_min=hsi_d_min, hsi_depth=hsi_depth, hsi_d_taper=hsi_d_taper, hsi_depth_taper=hsi_depth_taper);
         }
     } else if (profile == "cut") {
         translate([0, -sink/2]) {
             square([mounting_size.y, sink], center=true);
             translate([0, -sink/2]) {
-                pivot_holder(profile="cut", hsi_d_min=hsi_d_min, hsi_depth=hsi_depth, hsi_d_taper=hsi_d_taper, hsi_depth_taper=hsi_depth_taper);
+                support_holder(profile="cut", hsi_d_min=hsi_d_min, hsi_depth=hsi_depth, hsi_d_taper=hsi_d_taper, hsi_depth_taper=hsi_depth_taper);
             }
         }
     } else if (profile == "drill") {
-        translate([0, -sink]) pivot_holder(profile="drill");
+        translate([0, -sink]) support_holder(profile="drill");
     } else if (profile == "cut-top") {
         // TODO account for OLED module (if necessary)
         square(mounting_size, center=true);
@@ -305,11 +305,11 @@ if (ITEM == "printed_io_shield") {
     mounting_bracket();
 } else if (ITEM == "corner_support") {
     corner_support();
-} else if (ITEM == "pivot_holder") {
-    pivot_holder();
+} else if (ITEM == "support_holder") {
+    support_holder();
 } else if (ITEM == "oled_holder") {
     oled_holder();
 } else {
     echo("Usage: openscad -DITEM=model -o output.stl models.scad");
-    echo("Accepted model: printed_io_shield, mounting_bracket, corner_support, pivot_holder");
+    echo("Accepted model: printed_io_shield, mounting_bracket, corner_support, support_holder");
 }

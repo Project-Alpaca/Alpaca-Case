@@ -42,8 +42,8 @@ PREVIEW_TOP_PANEL = true;
 PREVIEW_BOTTOM = true;
 // Mounting brackets
 PREVIEW_MOUNTING = true;
-// Pivots
-PREVIEW_PIVOT = true;
+// Supports
+PREVIEW_SUPPORT = true;
 // LKP platform
 PREVIEW_LKP_PLATFORM = true;
 // LKP
@@ -95,7 +95,7 @@ SLIDER_OFFSET_REF = [1.5*BUTTON_DIST, SLIDER_BOTTOM_Y + SLIDER_SIZE_REF.y/2];
 SLIDER_BUTTON_GAP_CENTER = SLIDER_BOTTOM_Y - ((SLIDER_BOTTOM_Y - BUTTON_R_WITH_NOTCH) / 2) + BUTTON_OFFSET.y;
 BUTTON_OFFSET_BACKOFF = BUTTON_R_WITH_NOTCH + BUTTON_OFFSET.y + BOX_THICKNESS / 2 + 3;
 LKP_PLATFORM_OFFSET = [0, BUTTON_OFFSET_BACKOFF + BOX_THICKNESS / 2];
-PIVOT_CORNER_OFFSET_Y = BUTTON_OFFSET_BACKOFF - BOX_THICKNESS/2;
+SUPPORT_CORNER_OFFSET_Y = BUTTON_OFFSET_BACKOFF - BOX_THICKNESS/2;
 
 // Center of the slider, starts from the bottom left of slider platform.
 SLIDER_OFFSET_PLATFORM = SLIDER_OFFSET_REF + BUTTON_OFFSET - LKP_PLATFORM_OFFSET;
@@ -115,10 +115,10 @@ _box_side_f_idim = _box_side_fb_idim;
 _box_side_b_idim = _box_side_fb_idim;
 _box_bottom_idim = _box_tb_idim;
 _box_top_idim = _box_tb_idim;
-_box_pivot_v_button_idim = [INNER_SIZE.z, BUTTON_OFFSET_BACKOFF - BOX_THICKNESS / 2];
-_box_pivot_h_idim = [INNER_SIZE.x, INNER_SIZE.z];
+_box_support_v_button_idim = [INNER_SIZE.z, BUTTON_OFFSET_BACKOFF - BOX_THICKNESS / 2];
+_box_support_h_idim = [INNER_SIZE.x, INNER_SIZE.z];
 _box_lkp_platform_idim = [INNER_SIZE.x, INNER_SIZE.y - LKP_PLATFORM_OFFSET.y];
-_box_pivot_v_slider_idim = [BOX_SIZE.z-PANEL_THICKNESS+lkp_get_assy_zoffset()-BOX_THICKNESS, _box_lkp_platform_idim.y];
+_box_support_v_slider_idim = [BOX_SIZE.z-PANEL_THICKNESS+lkp_get_assy_zoffset()-BOX_THICKNESS, _box_lkp_platform_idim.y];
 
 
 function account_for_fingers(dim, tb, lr) = [
@@ -132,11 +132,11 @@ _box_top_xdim = _box_top_idim;
 _box_bottom_xdim = account_for_fingers(_box_bottom_idim, 2, 2);
 
 // 1 group of fingers on the bottom
-_box_pivot_h_xdim = account_for_fingers(_box_pivot_h_idim, 1, 0);
-// 1 group of fingers on the vertical pivot and 1 group on the bottom
-_box_pivot_v_button_xdim = account_for_fingers(_box_pivot_v_button_idim, 1, 1);
-// 1 group of fingers on the vertical pivot and 1 group on the bottom
-_box_pivot_v_slider_xdim = account_for_fingers(_box_pivot_v_slider_idim, 1, 1);
+_box_support_h_xdim = account_for_fingers(_box_support_h_idim, 1, 0);
+// 1 group of fingers on the vertical support and 1 group on the bottom
+_box_support_v_button_xdim = account_for_fingers(_box_support_v_button_idim, 1, 1);
+// 1 group of fingers on the vertical support and 1 group on the bottom
+_box_support_v_slider_xdim = account_for_fingers(_box_support_v_slider_idim, 1, 1);
 _box_lkp_platform_xdim = _box_lkp_platform_idim;
 
 // Accounting for the thickness for lasercut boards
@@ -161,27 +161,27 @@ module box_align_to_op(fingered_x=true, fingered_y=true) {
     ]) children();
 }
 
-function pivot_index(i) = BUTTON_OFFSET.x+as_lcb_center(button_gap_center(i-1)+BOX_THICKNESS/2);
+function support_index(i) = BUTTON_OFFSET.x+as_lcb_center(button_gap_center(i-1)+BOX_THICKNESS/2);
 
-module copy_to_pivot_center(x_only=false) {
+module copy_to_support_center(x_only=false) {
     for (i=[0:4]) {
-        translate([pivot_index(i), 0, x_only ? 0 : BOX_THICKNESS]) children();
+        translate([support_index(i), 0, x_only ? 0 : BOX_THICKNESS]) children();
     }
 }
 
-module copy_to_pivot_center_no_oled(x_only=false) {
+module copy_to_support_center_no_oled(x_only=false) {
     for (i=[0, 1, 3, 4]) {
-        translate([pivot_index(i), 0, x_only ? 0 : BOX_THICKNESS]) children();
+        translate([support_index(i), 0, x_only ? 0 : BOX_THICKNESS]) children();
     }
 }
 
-module move_to_pivot_center_oled(x_only=false) {
-    translate([pivot_index(2), 0, x_only ? 0 : BOX_THICKNESS]) children();
+module move_to_support_center_oled(x_only=false) {
+    translate([support_index(2), 0, x_only ? 0 : BOX_THICKNESS]) children();
 }
 
-module copy_to_slider_pivot_center(x_only=false) {
+module copy_to_slider_support_center(x_only=false) {
     for (i=[0:3]) {
-        translate([pivot_index(i+0.5), 0, x_only ? 0 : BOX_THICKNESS]) children();
+        translate([support_index(i+0.5), 0, x_only ? 0 : BOX_THICKNESS]) children();
     }
 }
 
@@ -208,8 +208,8 @@ module corner_screw_holes(x, y) {
 }
 
 // Wrappers
-module pivot_holder_w(profile="3d", align_y="c") {
-    pivot_holder(thickness=BOX_THICKNESS, profile=profile, align_y=align_y);
+module support_holder_w(profile="3d", align_y="c") {
+    support_holder(thickness=BOX_THICKNESS, profile=profile, align_y=align_y);
 }
 
 module corner_support_w(profile="3d") {
@@ -222,7 +222,7 @@ module oled_holder_w(profile="3d-assy") {
 
 // Bottom side (vector cutting layer)
 module _box_bottom() {
-    pivot_h_y = as_lcb_center(BUTTON_OFFSET_BACKOFF);
+    support_h_y = as_lcb_center(BUTTON_OFFSET_BACKOFF);
     lasercutoutSquare(thickness=BOX_THICKNESS,
                       x=_box_bottom_idim.x,
                       y=_box_bottom_idim.y,
@@ -240,19 +240,19 @@ module _box_bottom() {
                           [RIGHT, _box_bottom_idim.x, BOX_THICKNESS/2+_box_bottom_idim.y],
                       ],
                       simple_tab_holes=[
-                          [MID, pivot_index(0) - BOX_THICKNESS / 2, _box_pivot_v_button_idim.y / 2 - BOX_THICKNESS / 2],
-                          [MID, pivot_index(1) - BOX_THICKNESS / 2, _box_pivot_v_button_idim.y / 2 - BOX_THICKNESS / 2],
-                          [MID, pivot_index(2) - BOX_THICKNESS / 2, _box_pivot_v_button_idim.y / 2 - BOX_THICKNESS / 2],
-                          [MID, pivot_index(3) - BOX_THICKNESS / 2, _box_pivot_v_button_idim.y / 2 - BOX_THICKNESS / 2],
-                          [MID, pivot_index(4) - BOX_THICKNESS / 2, _box_pivot_v_button_idim.y / 2 - BOX_THICKNESS / 2],
-                          [MID, 1/5 * _box_pivot_h_idim.x - BOX_THICKNESS / 2, pivot_h_y],
-                          [MID, 2/5 * _box_pivot_h_idim.x - BOX_THICKNESS / 2, pivot_h_y],
-                          [MID, 3/5 * _box_pivot_h_idim.x - BOX_THICKNESS / 2, pivot_h_y],
-                          [MID, 4/5 * _box_pivot_h_idim.x - BOX_THICKNESS / 2, pivot_h_y],
-                          [MID, pivot_index(0.5) - BOX_THICKNESS / 2, LKP_PLATFORM_OFFSET.y + (_box_pivot_v_slider_idim.y / 2 - BOX_THICKNESS / 2)],
-                          [MID, pivot_index(1.5) - BOX_THICKNESS / 2, LKP_PLATFORM_OFFSET.y + (_box_pivot_v_slider_idim.y / 2 - BOX_THICKNESS / 2)],
-                          [MID, pivot_index(2.5) - BOX_THICKNESS / 2, LKP_PLATFORM_OFFSET.y + (_box_pivot_v_slider_idim.y / 2 - BOX_THICKNESS / 2)],
-                          [MID, pivot_index(3.5) - BOX_THICKNESS / 2, LKP_PLATFORM_OFFSET.y + (_box_pivot_v_slider_idim.y / 2 - BOX_THICKNESS / 2)],
+                          [MID, support_index(0) - BOX_THICKNESS / 2, _box_support_v_button_idim.y / 2 - BOX_THICKNESS / 2],
+                          [MID, support_index(1) - BOX_THICKNESS / 2, _box_support_v_button_idim.y / 2 - BOX_THICKNESS / 2],
+                          [MID, support_index(2) - BOX_THICKNESS / 2, _box_support_v_button_idim.y / 2 - BOX_THICKNESS / 2],
+                          [MID, support_index(3) - BOX_THICKNESS / 2, _box_support_v_button_idim.y / 2 - BOX_THICKNESS / 2],
+                          [MID, support_index(4) - BOX_THICKNESS / 2, _box_support_v_button_idim.y / 2 - BOX_THICKNESS / 2],
+                          [MID, 1/5 * _box_support_h_idim.x - BOX_THICKNESS / 2, support_h_y],
+                          [MID, 2/5 * _box_support_h_idim.x - BOX_THICKNESS / 2, support_h_y],
+                          [MID, 3/5 * _box_support_h_idim.x - BOX_THICKNESS / 2, support_h_y],
+                          [MID, 4/5 * _box_support_h_idim.x - BOX_THICKNESS / 2, support_h_y],
+                          [MID, support_index(0.5) - BOX_THICKNESS / 2, LKP_PLATFORM_OFFSET.y + (_box_support_v_slider_idim.y / 2 - BOX_THICKNESS / 2)],
+                          [MID, support_index(1.5) - BOX_THICKNESS / 2, LKP_PLATFORM_OFFSET.y + (_box_support_v_slider_idim.y / 2 - BOX_THICKNESS / 2)],
+                          [MID, support_index(2.5) - BOX_THICKNESS / 2, LKP_PLATFORM_OFFSET.y + (_box_support_v_slider_idim.y / 2 - BOX_THICKNESS / 2)],
+                          [MID, support_index(3.5) - BOX_THICKNESS / 2, LKP_PLATFORM_OFFSET.y + (_box_support_v_slider_idim.y / 2 - BOX_THICKNESS / 2)],
                       ]);
 }
 
@@ -275,9 +275,9 @@ module drl_box_bottom() {
     translate([_box_bottom_idim.x, _box_bottom_idim.y]) rotate([0, 0, 180]) corner_support_w(profile="drill-top");
     translate([0, _box_bottom_idim.y]) rotate([0, 0, 270]) corner_support_w(profile="drill-top");
 
-    // button pivots
-    translate([0, PIVOT_CORNER_OFFSET_Y]) rotate([0, 0, 270])corner_support_w(profile="drill-top");
-    translate([_box_bottom_idim.x, PIVOT_CORNER_OFFSET_Y]) rotate([0, 0, 180]) corner_support_w(profile="drill-top");
+    // button supports
+    translate([0, SUPPORT_CORNER_OFFSET_Y]) rotate([0, 0, 270])corner_support_w(profile="drill-top");
+    translate([_box_bottom_idim.x, SUPPORT_CORNER_OFFSET_Y]) rotate([0, 0, 180]) corner_support_w(profile="drill-top");
 }
 
 module eng_box_bottom() {
@@ -297,8 +297,8 @@ module _box_top() {
             translate(SLIDER_OFFSET_REF)
                 lkp_assy_sensor_center() lkp_assy_profile();
         }
-        move_to_pivot_center_oled(x_only=true)
-            translate([0, _box_pivot_v_button_idim.y / 5])
+        move_to_support_center_oled(x_only=true)
+            translate([0, _box_support_v_button_idim.y / 5])
             oled_holder_w(profile="cut-top");
     }
 }
@@ -316,9 +316,9 @@ module box_top() {
 
 // Top side (engraving layer)
 module drl_box_top() {
-    // pivot holders
-    copy_to_pivot_center(x_only=true) translate([0, _box_pivot_v_button_idim.y / 2])
-        pivot_holder_w(profile="drill_vmount");
+    // support holders
+    copy_to_support_center(x_only=true) translate([0, _box_support_v_button_idim.y / 2])
+        support_holder_w(profile="drill_vmount");
 
     // 4 corners
     corner_support_w(profile="drill-top");
@@ -326,9 +326,9 @@ module drl_box_top() {
     translate([_box_bottom_idim.x, _box_bottom_idim.y]) rotate([0, 0, 180]) corner_support_w(profile="drill-top");
     translate([0, _box_bottom_idim.y]) rotate([0, 0, 270]) corner_support_w(profile="drill-top");
 
-    // pivot corners
-    translate([0, PIVOT_CORNER_OFFSET_Y]) rotate([0, 0, 270]) corner_support_w(profile="drill-top");
-    translate([_box_bottom_idim.x, PIVOT_CORNER_OFFSET_Y]) rotate([0, 0, 180]) corner_support_w(profile="drill-top");
+    // support corners
+    translate([0, SUPPORT_CORNER_OFFSET_Y]) rotate([0, 0, 270]) corner_support_w(profile="drill-top");
+    translate([_box_bottom_idim.x, SUPPORT_CORNER_OFFSET_Y]) rotate([0, 0, 180]) corner_support_w(profile="drill-top");
 }
 
 module eng_box_top() {
@@ -378,13 +378,13 @@ module box_side_right() {
 module drl_box_side_left() {
     corner_support_w(profile="drill-side-h");
     translate([0, _box_side_lr_idim.y]) mirror([0, 1]) corner_support_w(profile="drill-side-h");
-    translate([0, PIVOT_CORNER_OFFSET_Y]) mirror([0, 1]) corner_support_w(profile="drill-side-h");
+    translate([0, SUPPORT_CORNER_OFFSET_Y]) mirror([0, 1]) corner_support_w(profile="drill-side-h");
 }
 
 module drl_box_side_right() {
     corner_support_w(profile="drill-side-h");
     translate([0, _box_side_lr_idim.y]) mirror([0, 1]) corner_support_w(profile="drill-side-h");
-    translate([0, _box_side_lr_idim.y - PIVOT_CORNER_OFFSET_Y]) corner_support_w(profile="drill-side-h");
+    translate([0, _box_side_lr_idim.y - SUPPORT_CORNER_OFFSET_Y]) corner_support_w(profile="drill-side-h");
 }
 
 module eng_box_side_left() {
@@ -402,8 +402,8 @@ module eng_box_side_right() {
 // Front side (vector cutting layer)
 module _box_side_f() {
     // TODO auxiliary control panel
-    pivot_tab_x = as_lcb_center(_box_side_f_idim.x/2);
-    pivot_tab_y = _box_side_f_idim.y-PANEL_THICKNESS-BOX_THICKNESS;
+    support_tab_x = as_lcb_center(_box_side_f_idim.x/2);
+    support_tab_y = _box_side_f_idim.y-PANEL_THICKNESS-BOX_THICKNESS;
     difference() {
         lasercutoutSquare(thickness=BOX_THICKNESS,
                           x=_box_side_f_idim.x,
@@ -416,17 +416,17 @@ module _box_side_f() {
                               [RIGHT, 1, FINGER_COUNT.z]
                           ],
                           simple_tab_holes=[
-                              //[MID, pivot_tab_x, pivot_tab_y/4-BOX_THICKNESS/2],
-                              //[MID, pivot_tab_x, pivot_tab_y*2/4-BOX_THICKNESS/2],
-                              //[MID, pivot_tab_x, pivot_tab_y*3/4-BOX_THICKNESS/2],
+                              //[MID, support_tab_x, support_tab_y/4-BOX_THICKNESS/2],
+                              //[MID, support_tab_x, support_tab_y*2/4-BOX_THICKNESS/2],
+                              //[MID, support_tab_x, support_tab_y*3/4-BOX_THICKNESS/2],
                           ]);
-        //translate([pivot_index(1.5), _box_side_f_idim.y/2, 0])
+        //translate([support_index(1.5), _box_side_f_idim.y/2, 0])
         //extrude_box_cutout()
         //    footprint_1602();
-        translate([pivot_index(2.5), _box_side_f_idim.y*2/3, 0])
+        translate([support_index(2.5), _box_side_f_idim.y*2/3, 0])
         extrude_box_cutout()
             footprint_re();
-        translate([pivot_index(2.5), _box_side_f_idim.y/3, 0])
+        translate([support_index(2.5), _box_side_f_idim.y/3, 0])
         extrude_box_cutout()
             footprint_control();
     }
@@ -445,15 +445,15 @@ module box_side_f() {
 
 // Front side (engraving layer)
 module drl_box_side_f() {
-    //translate([pivot_index(1.5), _box_side_f_idim.y/2, 0])
+    //translate([support_index(1.5), _box_side_f_idim.y/2, 0])
     //    footprint_1602_eng();
-    //translate([pivot_index(2.5), _box_side_f_idim.y*2/3, 0])
+    //translate([support_index(2.5), _box_side_f_idim.y*2/3, 0])
     //    footprint_re_eng();
-    translate([pivot_index(2.5), _box_side_f_idim.y/3, 0])
+    translate([support_index(2.5), _box_side_f_idim.y/3, 0])
         footprint_control_eng();
 
-    copy_to_pivot_center(x_only=true) translate([0, _box_pivot_v_button_idim.x / 2])
-        pivot_holder_w(profile="drill_vmount");
+    copy_to_support_center(x_only=true) translate([0, _box_support_v_button_idim.x / 2])
+        support_holder_w(profile="drill_vmount");
 
     corner_support_w(profile="drill-side");
     translate([_box_side_f_idim.x, 0]) mirror([1, 0]) corner_support_w(profile="drill-side");
@@ -467,8 +467,8 @@ module eng_box_side_f() {
 
 // Back side (vector cutting layer)
 module _box_side_b() {
-    pivot_tab_x = _box_side_b_idim.x/2-BOX_THICKNESS/2;
-    pivot_tab_y = _box_side_b_idim.y-PANEL_THICKNESS-BOX_THICKNESS;
+    support_tab_x = _box_side_b_idim.x/2-BOX_THICKNESS/2;
+    support_tab_y = _box_side_b_idim.y-PANEL_THICKNESS-BOX_THICKNESS;
     difference() {
         lasercutoutSquare(thickness=BOX_THICKNESS,
                           x=_box_side_b_idim.x,
@@ -482,11 +482,11 @@ module _box_side_b() {
                               
                           ],
                           simple_tab_holes=[
-                              //[MID, pivot_tab_x, pivot_tab_y/4-BOX_THICKNESS/2],
-                              //[MID, pivot_tab_x, pivot_tab_y*2/4-BOX_THICKNESS/2],
-                              //[MID, pivot_tab_x, pivot_tab_y*3/4-BOX_THICKNESS/2],
+                              //[MID, support_tab_x, support_tab_y/4-BOX_THICKNESS/2],
+                              //[MID, support_tab_x, support_tab_y*2/4-BOX_THICKNESS/2],
+                              //[MID, support_tab_x, support_tab_y*3/4-BOX_THICKNESS/2],
                           ]);
-        move_to_pivot_center_oled(x_only=true)
+        move_to_support_center_oled(x_only=true)
             translate([0, _box_side_b_idim.y/3, 0])
             extrude_box_cutout()
             footprint_back_panel_cutout();
@@ -506,16 +506,16 @@ module box_side_b() {
 
 // Back side (drill layer)
 module drl_box_side_b() {
-    move_to_pivot_center_oled(x_only=true)
+    move_to_support_center_oled(x_only=true)
         translate([0, _box_side_b_idim.y/3])
         footprint_back_panel_cutout_eng();
 
     corner_support_w(profile="drill-side");
     translate([_box_side_f_idim.x, 0]) mirror([1, 0]) corner_support_w(profile="drill-side");
 
-    translate([0, _box_pivot_v_slider_idim.x / 2])
-    copy_to_slider_pivot_center()
-        pivot_holder_w(profile="drill_vmount");
+    translate([0, _box_support_v_slider_idim.x / 2])
+    copy_to_slider_support_center()
+        support_holder_w(profile="drill_vmount");
 }
 
 // Back side (engraving layer)
@@ -525,202 +525,202 @@ module eng_box_side_b() {
     }
 }
 
-// Horizontal pivot (between slider and main buttons)
+// Horizontal support (between slider and main buttons)
 // TODO: cable holes near center
-module _box_pivot_h() {
+module _box_support_h() {
     difference() {
         lasercutoutSquare(
             thickness=BOX_THICKNESS,
-            x=_box_pivot_h_idim.x,
-            y=_box_pivot_h_idim.y,
+            x=_box_support_h_idim.x,
+            y=_box_support_h_idim.y,
             simple_tabs=[
-                [DOWN, 1/5 * _box_pivot_h_idim.x, 0],
-                [DOWN, 2/5 * _box_pivot_h_idim.x, 0],
-                [DOWN, 3/5 * _box_pivot_h_idim.x, 0],
-                [DOWN, 4/5 * _box_pivot_h_idim.x, 0],
+                [DOWN, 1/5 * _box_support_h_idim.x, 0],
+                [DOWN, 2/5 * _box_support_h_idim.x, 0],
+                [DOWN, 3/5 * _box_support_h_idim.x, 0],
+                [DOWN, 4/5 * _box_support_h_idim.x, 0],
             ],
             simple_tab_holes=[
-                [MID, pivot_index(0) - BOX_THICKNESS / 2, _box_pivot_v_button_idim.x / 2 - BOX_THICKNESS / 2],
-                [MID, pivot_index(1) - BOX_THICKNESS / 2, _box_pivot_v_button_idim.x / 2 - BOX_THICKNESS / 2],
-                [MID, pivot_index(2) - BOX_THICKNESS / 2, _box_pivot_v_button_idim.x / 2 - BOX_THICKNESS / 2],
-                [MID, pivot_index(3) - BOX_THICKNESS / 2, _box_pivot_v_button_idim.x / 2 - BOX_THICKNESS / 2],
-                [MID, pivot_index(4) - BOX_THICKNESS / 2, _box_pivot_v_button_idim.x / 2 - BOX_THICKNESS / 2],
-                [MID, pivot_index(0.5) - BOX_THICKNESS / 2, _box_pivot_v_slider_idim.x / 2 - BOX_THICKNESS / 2],
-                [MID, pivot_index(1.5) - BOX_THICKNESS / 2, _box_pivot_v_slider_idim.x / 2 - BOX_THICKNESS / 2],
-                [MID, pivot_index(2.5) - BOX_THICKNESS / 2, _box_pivot_v_slider_idim.x / 2 - BOX_THICKNESS / 2],
-                [MID, pivot_index(3.5) - BOX_THICKNESS / 2, _box_pivot_v_slider_idim.x / 2 - BOX_THICKNESS / 2],
+                [MID, support_index(0) - BOX_THICKNESS / 2, _box_support_v_button_idim.x / 2 - BOX_THICKNESS / 2],
+                [MID, support_index(1) - BOX_THICKNESS / 2, _box_support_v_button_idim.x / 2 - BOX_THICKNESS / 2],
+                [MID, support_index(2) - BOX_THICKNESS / 2, _box_support_v_button_idim.x / 2 - BOX_THICKNESS / 2],
+                [MID, support_index(3) - BOX_THICKNESS / 2, _box_support_v_button_idim.x / 2 - BOX_THICKNESS / 2],
+                [MID, support_index(4) - BOX_THICKNESS / 2, _box_support_v_button_idim.x / 2 - BOX_THICKNESS / 2],
+                [MID, support_index(0.5) - BOX_THICKNESS / 2, _box_support_v_slider_idim.x / 2 - BOX_THICKNESS / 2],
+                [MID, support_index(1.5) - BOX_THICKNESS / 2, _box_support_v_slider_idim.x / 2 - BOX_THICKNESS / 2],
+                [MID, support_index(2.5) - BOX_THICKNESS / 2, _box_support_v_slider_idim.x / 2 - BOX_THICKNESS / 2],
+                [MID, support_index(3.5) - BOX_THICKNESS / 2, _box_support_v_slider_idim.x / 2 - BOX_THICKNESS / 2],
             ]
         );
         for (i=[1:3]) {
             extrude_box_cutout() hull() {
-                translate([pivot_index(i-0.2), _box_pivot_h_idim.y / 4]) circle(r=10);
-                translate([pivot_index(i+0.2), _box_pivot_h_idim.y / 4]) circle(r=10);
+                translate([support_index(i-0.2), _box_support_h_idim.y / 4]) circle(r=10);
+                translate([support_index(i+0.2), _box_support_h_idim.y / 4]) circle(r=10);
             }
         }
     }
 }
 
-module box_pivot_h() {
+module box_support_h() {
     if (DRILL_AS == "cut") {
         difference() {
-            _box_pivot_h();
-            extrude_box_cutout() drl_box_pivot_h();
+            _box_support_h();
+            extrude_box_cutout() drl_box_support_h();
         }
     } else {
-        _box_pivot_h();
+        _box_support_h();
     }
 }
 
-module drl_box_pivot_h() {
+module drl_box_support_h() {
     corner_support_w(profile="drill-side");
-    translate([_box_pivot_h_idim.x, 0]) mirror([1, 0]) corner_support_w(profile="drill-side");
+    translate([_box_support_h_idim.x, 0]) mirror([1, 0]) corner_support_w(profile="drill-side");
 }
 
-module eng_box_pivot_h() {
+module eng_box_support_h() {
     if (DRILL_AS == "eng") {
-        drl_box_pivot_h();
+        drl_box_support_h();
     }
 }
 
-// Vertical pivot (between main buttons)
-module box_pivot_v_button() {
+// Vertical support (between main buttons)
+module box_support_v_button() {
     if (DRILL_AS == "cut") {
         difference() {
-            _box_pivot_v_button();
-            extrude_box_cutout() drl_box_pivot_v_button();
+            _box_support_v_button();
+            extrude_box_cutout() drl_box_support_v_button();
         }
     } else {
-        _box_pivot_v_button();
+        _box_support_v_button();
     }
 }
 
-// TODO inherit this and make the center pivot with OLED mount and inner left/right pivot with cable holes.
-module _box_pivot_v_button() {
+// TODO inherit this and make the center support with OLED mount and inner left/right support with cable holes.
+module _box_support_v_button() {
     // Rotate by Y axis by -90deg
     // local X = global Z, local Y = global Y
     difference() {
         lasercutoutSquare(
             thickness=BOX_THICKNESS,
-            x=_box_pivot_v_button_idim.x,
-            y=_box_pivot_v_button_idim.y,
+            x=_box_support_v_button_idim.x,
+            y=_box_support_v_button_idim.y,
             simple_tabs =[
-                [UP, _box_pivot_v_button_idim.x / 2, _box_pivot_v_button_idim.y],
-                [LEFT, 0, _box_pivot_v_button_idim.y / 2],
+                [UP, _box_support_v_button_idim.x / 2, _box_support_v_button_idim.y],
+                [LEFT, 0, _box_support_v_button_idim.y / 2],
             ]
         );
         // top
-        translate([_box_pivot_v_button_idim.x, _box_pivot_v_button_idim.y / 2])
-            rotate([0, 0, -90]) extrude_box_cutout() pivot_holder_w(profile="cut");
+        translate([_box_support_v_button_idim.x, _box_support_v_button_idim.y / 2])
+            rotate([0, 0, -90]) extrude_box_cutout() support_holder_w(profile="cut");
         // front
-        translate([_box_pivot_v_button_idim.x / 2, 0])
-            rotate([0, 0, 180]) extrude_box_cutout() pivot_holder_w(profile="cut");
+        translate([_box_support_v_button_idim.x / 2, 0])
+            rotate([0, 0, 180]) extrude_box_cutout() support_holder_w(profile="cut");
     }
 }
 
-module drl_box_pivot_v_button() {
-    translate([_box_pivot_v_button_idim.x, _box_pivot_v_button_idim.y / 2])
+module drl_box_support_v_button() {
+    translate([_box_support_v_button_idim.x, _box_support_v_button_idim.y / 2])
             rotate([0, 0, -90])
-        pivot_holder_w(profile="drill");
-    translate([_box_pivot_v_button_idim.x / 2, 0])
+        support_holder_w(profile="drill");
+    translate([_box_support_v_button_idim.x / 2, 0])
             rotate([0, 0, 180])
-        pivot_holder_w(profile="drill");
+        support_holder_w(profile="drill");
 }
 
-module eng_box_pivot_v_button() {
+module eng_box_support_v_button() {
     if (DRILL_AS == "eng") {
-        drl_box_pivot_v_button();
+        drl_box_support_v_button();
     }
 }
 
-module _box_pivot_v_button_oled() {
+module _box_support_v_button_oled() {
     difference() {
-        _box_pivot_v_button();
+        _box_support_v_button();
         // TODO do some checks on this so it will always fit (or give an error if it's impossible)
-        translate([_box_pivot_v_button_idim.x, _box_pivot_v_button_idim.y / 5])
+        translate([_box_support_v_button_idim.x, _box_support_v_button_idim.y / 5])
             rotate([0, 0, -90])
             extrude_box_cutout()
             oled_holder_w(profile="cut");
     }
 }
 
-module box_pivot_v_button_oled() {
+module box_support_v_button_oled() {
     if (DRILL_AS == "cut") {
         difference() {
-            _box_pivot_v_button_oled();
-            extrude_box_cutout() drl_box_pivot_v_button_oled();
+            _box_support_v_button_oled();
+            extrude_box_cutout() drl_box_support_v_button_oled();
         }
     } else {
-        _box_pivot_v_button_oled();
+        _box_support_v_button_oled();
     }
 }
 
-module drl_box_pivot_v_button_oled() {
-    drl_box_pivot_v_button();
-    translate([_box_pivot_v_button_idim.x, _box_pivot_v_button_idim.y / 5])
+module drl_box_support_v_button_oled() {
+    drl_box_support_v_button();
+    translate([_box_support_v_button_idim.x, _box_support_v_button_idim.y / 5])
         rotate([0, 0, -90])
         oled_holder_w(profile="drill");
 }
 
-module eng_box_pivot_v_button_oled() {
+module eng_box_support_v_button_oled() {
     if (DRILL_AS == "eng") {
-        drl_box_pivot_v_button_oled();
+        drl_box_support_v_button_oled();
     }
 }
 
-//Vertical pivot for slider
-module box_pivot_v_slider() {
+//Vertical support for slider
+module box_support_v_slider() {
     if (DRILL_AS == "cut") {
         difference() {
-            _box_pivot_v_slider();
-            extrude_box_cutout() drl_box_pivot_v_slider();
+            _box_support_v_slider();
+            extrude_box_cutout() drl_box_support_v_slider();
         }
     } else {
-        _box_pivot_v_slider();
+        _box_support_v_slider();
     }
 }
 
-module _box_pivot_v_slider() {
+module _box_support_v_slider() {
     // Rotate by Y axis by -90deg
     // local X = global Z, local Y = global Y
     difference() {
         lasercutoutSquare(
             thickness=BOX_THICKNESS,
-            x=_box_pivot_v_slider_idim.x,
-            y=_box_pivot_v_slider_idim.y,
+            x=_box_support_v_slider_idim.x,
+            y=_box_support_v_slider_idim.y,
             simple_tabs=[
-                [DOWN, _box_pivot_v_slider_idim.x / 2, 0],
-                [LEFT, 0, _box_pivot_v_slider_idim.y / 2],
+                [DOWN, _box_support_v_slider_idim.x / 2, 0],
+                [LEFT, 0, _box_support_v_slider_idim.y / 2],
             ],
             circles_remove=[
                 // Slider cable holes
-                [10, _box_pivot_v_slider_idim.x, _box_pivot_v_slider_idim.y / 2],
+                [10, _box_support_v_slider_idim.x, _box_support_v_slider_idim.y / 2],
             ]
         );
         // top
-        translate([_box_pivot_v_slider_idim.x, 0])
-            rotate([0, 0, -90]) extrude_box_cutout() pivot_holder_w(profile="cut", align_y="+");
-        translate([_box_pivot_v_slider_idim.x, _box_pivot_v_slider_idim.y])
-            rotate([0, 0, -90]) extrude_box_cutout() pivot_holder_w(profile="cut", align_y="-");
+        translate([_box_support_v_slider_idim.x, 0])
+            rotate([0, 0, -90]) extrude_box_cutout() support_holder_w(profile="cut", align_y="+");
+        translate([_box_support_v_slider_idim.x, _box_support_v_slider_idim.y])
+            rotate([0, 0, -90]) extrude_box_cutout() support_holder_w(profile="cut", align_y="-");
         // back
-        translate([_box_pivot_v_slider_idim.x / 2, _box_pivot_v_slider_idim.y])
-            extrude_box_cutout() pivot_holder_w(profile="cut");
+        translate([_box_support_v_slider_idim.x / 2, _box_support_v_slider_idim.y])
+            extrude_box_cutout() support_holder_w(profile="cut");
     }
 }
 
-module drl_box_pivot_v_slider() {
-    translate([_box_pivot_v_slider_idim.x, 0])
+module drl_box_support_v_slider() {
+    translate([_box_support_v_slider_idim.x, 0])
             rotate([0, 0, -90])
-        pivot_holder_w(profile="drill", align_y="+");
-    translate([_box_pivot_v_slider_idim.x, _box_pivot_v_slider_idim.y])
+        support_holder_w(profile="drill", align_y="+");
+    translate([_box_support_v_slider_idim.x, _box_support_v_slider_idim.y])
             rotate([0, 0, -90])
-        pivot_holder_w(profile="drill", align_y="-");
-    translate([_box_pivot_v_slider_idim.x / 2, _box_pivot_v_slider_idim.y])
-        pivot_holder_w(profile="drill");
+        support_holder_w(profile="drill", align_y="-");
+    translate([_box_support_v_slider_idim.x / 2, _box_support_v_slider_idim.y])
+        support_holder_w(profile="drill");
 }
 
-module eng_box_pivot_v_slider() {
+module eng_box_support_v_slider() {
     if (DRILL_AS == "eng") {
-        drl_box_pivot_v_slider();
+        drl_box_support_v_slider();
     }
 }
 
@@ -760,10 +760,10 @@ module _box_lkp_platform() {
 }
 
 module drl_box_lkp_platform() {
-    // pivot holders
-    copy_to_slider_pivot_center() {
-        translate([0, _box_lkp_platform_idim.y]) pivot_holder_w(profile="drill_vmount", align_y="-");
-        pivot_holder_w(profile="drill_vmount", align_y="+");
+    // support holders
+    copy_to_slider_support_center() {
+        translate([0, _box_lkp_platform_idim.y]) support_holder_w(profile="drill_vmount", align_y="-");
+        support_holder_w(profile="drill_vmount", align_y="+");
     }
     // TODO drill profile for LKP
     translate(SLIDER_OFFSET_PLATFORM) lkp_assy_drill_profile_centered();
@@ -855,9 +855,9 @@ module panel() {
 }
 
 module drl_panel() {
-    // pivot holders
-    copy_to_pivot_center(x_only=true) translate([0, _box_pivot_v_button_idim.y / 2])
-        pivot_holder_w(profile="drill_vmount");
+    // support holders
+    copy_to_support_center(x_only=true) translate([0, _box_support_v_button_idim.y / 2])
+        support_holder_w(profile="drill_vmount");
 
     // 4 corners
     corner_support_w(profile="drill-top");
@@ -865,9 +865,9 @@ module drl_panel() {
     translate([_box_bottom_idim.x, _box_bottom_idim.y]) rotate([0, 0, 180]) corner_support_w(profile="drill-top");
     translate([0, _box_bottom_idim.y]) rotate([0, 0, 270]) corner_support_w(profile="drill-top");
 
-    // pivot corners
-    translate([0, PIVOT_CORNER_OFFSET_Y]) rotate([0, 0, 270]) corner_support_w(profile="drill-top");
-    translate([_box_bottom_idim.x, PIVOT_CORNER_OFFSET_Y]) rotate([0, 0, 180]) corner_support_w(profile="drill-top");
+    // support corners
+    translate([0, SUPPORT_CORNER_OFFSET_Y]) rotate([0, 0, 270]) corner_support_w(profile="drill-top");
+    translate([_box_bottom_idim.x, SUPPORT_CORNER_OFFSET_Y]) rotate([0, 0, 180]) corner_support_w(profile="drill-top");
 }
 
 module eng_panel() {
@@ -944,7 +944,7 @@ module box3_2d() {
             translate([BOX_THICKNESS*3+BOX_SIZE.z, BOX_THICKNESS]) {
                 projection() box_side_right();
                 translate([BOX_THICKNESS*2+BOX_SIZE.z, 0])
-                    projection() box_pivot();
+                    projection() box_support();
             }
         }
     }
@@ -964,21 +964,23 @@ module boxes_lscad() {
     lpart("box_top", _box_top_xdim) linear_extrude(BOX_THICKNESS)
         box_top();
     for (index_pv=[0, 1, 3, 4]) {
-        lpart(str("box_pivot_v_button_", index_pv), _box_pivot_v_button_xdim) 
-            box_align_to_op(fingered_y=false) box_pivot_v_button();
+        lpart(str("box_support_v_button_", index_pv), _box_support_v_button_xdim) 
+            box_align_to_op(fingered_y=false) box_support_v_button();
     }
-    lpart("box_pivot_v_button_oled", _box_pivot_v_button_xdim) 
+    lpart("box_support_v_button_oled", _box_support_v_button_xdim) 
         box_align_to_op(fingered_y=false)
-        box_pivot_v_button_oled();
+        box_support_v_button_oled();
     for (index_pv=[0:3]) {
-        lpart(str("box_pivot_v_slider_", index_pv), _box_pivot_v_slider_xdim) 
-            box_align_to_op() box_pivot_v_slider();
+        lpart(str("box_support_v_slider_", index_pv), _box_support_v_slider_xdim) 
+            box_align_to_op() box_support_v_slider();
     }
-    lpart("box_pivot_h", _box_pivot_h_xdim)
-        box_align_to_op(fingered_x=false) box_pivot_h();
+    lpart("box_support_h", _box_support_h_xdim)
+        box_align_to_op(fingered_x=false) box_support_h();
     lpart("box_lkp_platform", _box_lkp_platform_xdim)
         box_lkp_platform();
 }
+
+echo(OUTER_SIZE=OUTER_SIZE);
 
 if (_PREVIEW) {
     // Orders matter here in order to maintain the transparent illusions
@@ -998,25 +1000,25 @@ if (_PREVIEW) {
             translate([0, 0, lkp_get_assy_zoffset()])
             box_lkp_platform();
     }
-    if (PREVIEW_PIVOT) {
+    if (PREVIEW_SUPPORT) {
         color("Red", 0.5) {
             //translate([BOX_SIZE.x/2+BOX_THICKNESS/2,0,BOX_THICKNESS])
             //rotate([0, -90, 0])
-            //    box_pivot();
+            //    box_support();
             // original pos is outside edge
-            // horizontal pivot
+            // horizontal support
             translate([0, as_lcb_center(BUTTON_OFFSET_BACKOFF+BOX_THICKNESS), BOX_THICKNESS])
             rotate([90, 0, 0])
-                box_pivot_h();
-            // vertical pivot (button side)
-            copy_to_pivot_center_no_oled() translate([BOX_THICKNESS/2, 0, 0]) rotate([0, -90, 0]) box_pivot_v_button();
-            // vertical pivot (button side with OLED mount)
-            move_to_pivot_center_oled()
+                box_support_h();
+            // vertical support (button side)
+            copy_to_support_center_no_oled() translate([BOX_THICKNESS/2, 0, 0]) rotate([0, -90, 0]) box_support_v_button();
+            // vertical support (button side with OLED mount)
+            move_to_support_center_oled()
                 translate([BOX_THICKNESS/2, 0, 0])
                 rotate([0, -90, 0])
-                box_pivot_v_button_oled();
-            // vertical pivot (slider side)
-            copy_to_slider_pivot_center() translate([BOX_THICKNESS/2, LKP_PLATFORM_OFFSET.y, 0]) rotate([0, -90, 0]) box_pivot_v_slider();
+                box_support_v_button_oled();
+            // vertical support (slider side)
+            copy_to_slider_support_center() translate([BOX_THICKNESS/2, LKP_PLATFORM_OFFSET.y, 0]) rotate([0, -90, 0]) box_support_v_slider();
         }
     }
 
@@ -1027,26 +1029,26 @@ if (_PREVIEW) {
             translate([INNER_SIZE.x, 0]) rotate([0, 0, 90]) corner_support_w();
             translate([INNER_SIZE.x, INNER_SIZE.y]) rotate([0, 0, 180]) corner_support_w();
             translate([0, INNER_SIZE.y]) rotate([0, 0, 270]) corner_support_w();
-            translate([0, PIVOT_CORNER_OFFSET_Y]) rotate([0, 0, 270]) corner_support_w();
-            translate([INNER_SIZE.x, PIVOT_CORNER_OFFSET_Y]) rotate([0, 0, 180]) corner_support_w();
+            translate([0, SUPPORT_CORNER_OFFSET_Y]) rotate([0, 0, 270]) corner_support_w();
+            translate([INNER_SIZE.x, SUPPORT_CORNER_OFFSET_Y]) rotate([0, 0, 180]) corner_support_w();
         }
-        // button pivot holder
-        copy_to_pivot_center() {
+        // button support holder
+        copy_to_support_center() {
             // Top
-            translate([0, _box_pivot_v_button_idim.y / 2, _box_pivot_v_button_idim.x]) pivot_holder_w();
+            translate([0, _box_support_v_button_idim.y / 2, _box_support_v_button_idim.x]) support_holder_w();
             // Front
-            translate([0, 0, _box_pivot_v_button_idim.x / 2]) rotate([90, 0, 0]) pivot_holder_w();
+            translate([0, 0, _box_support_v_button_idim.x / 2]) rotate([90, 0, 0]) support_holder_w();
         }
-        move_to_pivot_center_oled()
-            translate([0, _box_pivot_v_button_idim.y / 5, _box_pivot_v_button_idim.x])
+        move_to_support_center_oled()
+            translate([0, _box_support_v_button_idim.y / 5, _box_support_v_button_idim.x])
             oled_holder_w();
-        // slider platform pivot holder
-        copy_to_slider_pivot_center() {
+        // slider platform support holder
+        copy_to_slider_support_center() {
             // Top (only some needs to be populated in practice)
-            translate([0, LKP_PLATFORM_OFFSET.y, _box_pivot_v_slider_idim.x]) pivot_holder_w(align_y="+");
-            translate([0, LKP_PLATFORM_OFFSET.y+_box_pivot_v_slider_idim.y, _box_pivot_v_slider_idim.x]) pivot_holder_w(align_y="-");
+            translate([0, LKP_PLATFORM_OFFSET.y, _box_support_v_slider_idim.x]) support_holder_w(align_y="+");
+            translate([0, LKP_PLATFORM_OFFSET.y+_box_support_v_slider_idim.y, _box_support_v_slider_idim.x]) support_holder_w(align_y="-");
             // Back
-            translate([0, LKP_PLATFORM_OFFSET.y+_box_pivot_v_slider_idim.y, _box_pivot_v_slider_idim.x / 2]) rotate([-90, 0, 0]) pivot_holder_w();
+            translate([0, LKP_PLATFORM_OFFSET.y+_box_support_v_slider_idim.y, _box_support_v_slider_idim.x / 2]) rotate([-90, 0, 0]) support_holder_w();
         }
     }
 
