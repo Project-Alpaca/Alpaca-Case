@@ -30,7 +30,7 @@ PIPENV_PIPFILE=ext/laserscad-alt/Pipfile pipenv install
 To use laserscad support, run
 
 ```sh
-PIPENV_PIPFILE=ext/laserscad-alt/Pipfile pipenv run python ext/laserscad-alt/lscad.py cut case.scad <page_width>x<page_height> -D '{"SHEET": "lscad"}'
+PIPENV_PIPFILE=ext/laserscad-alt/Pipfile pipenv run python ext/laserscad-alt/lscad.py cut case.scad <page_width>x<page_height> -D '{"SHEET": "lscad", "PREVIEW_3D": false}'
 ```
 
 Replace `cut` with `engrave` to generate engrave data. (WIP)
